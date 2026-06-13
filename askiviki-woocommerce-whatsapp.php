@@ -13,3 +13,21 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+require_once plugin_dir_path(__FILE__) . 'includes/class-loader.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-activator.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-deactivator.php';
+require_once plugin_dir_path(__FILE__) . 'admin/class-admin.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-settings.php';
+
+new AskIViki_WA_Admin();
+new AskIViki_WA_Settings();
+
+register_activation_hook(
+    __FILE__,
+    ['AskIViki_WA_Activator', 'activate']
+);
+
+register_deactivation_hook(
+    __FILE__,
+    ['AskIViki_WA_Deactivator', 'deactivate']
+);
