@@ -8,6 +8,18 @@ class AskIViki_WA_Service
 {
     public function send_message($phone, $message)
     {
+        if (
+            get_option(
+                'askiviki_wa_enabled',
+                'yes'
+            ) !== 'yes'
+        ) {
+            error_log(
+                '[AskIViki WA] WhatsApp disabled'
+            );
+
+            return false;
+        }
         $phone_id   = get_option('askiviki_wa_phone_id');
         $token      = get_option('askiviki_wa_access_token');
         $phone      = $this->format_phone($phone);
