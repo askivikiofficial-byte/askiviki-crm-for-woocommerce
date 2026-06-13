@@ -155,6 +155,17 @@ class AskIViki_WA_Settings {
             'askiviki-whatsapp',
             'askiviki_wa_main'
         );
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_admin_notifications'
+        );
+        add_settings_field(
+            'askiviki_wa_admin_notifications',
+            'Admin Notifications',
+            [$this, 'admin_notifications_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
     }
 
     public function phone_field() {
@@ -340,6 +351,23 @@ Total: ₹{order_total}"
             {order_total},
             {site_name}
         </p>
+        <?php
+    }
+    public function admin_notifications_field()
+    {
+        $value = get_option(
+            'askiviki_wa_admin_notifications',
+            'yes'
+        );
+
+        ?>
+        <input
+            type="checkbox"
+            name="askiviki_wa_admin_notifications"
+            value="yes"
+            <?php checked($value, 'yes'); ?>
+        >
+        Enable Admin Notifications
         <?php
     }
 }
