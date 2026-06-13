@@ -48,6 +48,15 @@ class AskIViki_WA_Service
                 'timeout' => 30
             ]
         );
+        $this->save_log(
+            null,
+            $phone,
+            is_wp_error($response)
+                ? 'failed'
+                : 'sent',
+            $message,
+            wp_remote_retrieve_body($response)
+        );
         if (is_wp_error($response)) {
             return false;
         }
@@ -65,5 +74,21 @@ class AskIViki_WA_Service
         }
 
         return $phone;
+    }
+    private function save_log($order_id,$phone,$status,$message,$response)
+    {
+        global $wpdb;
+
+        $wpdb->insert(
+            $wpdb->prefix . 'askiviki_wa_logs',
+            [
+                'order_id'   => $order_id,
+                'phone'      => $phone,
+                'status'     => $status,
+                'message'    => $message,
+                'response'   => maybe_serialize($response),
+                'created_at' => current_time('mysql')
+            ]
+        );
     }
 }

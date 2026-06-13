@@ -24,6 +24,14 @@ class AskIViki_WA_Admin {
             'askiviki-whatsapp',
             [$this, 'settings_page']
         );
+        add_submenu_page(
+            'woocommerce',
+            'WhatsApp Logs',
+            'WhatsApp Logs',
+            'manage_options',
+            'askiviki-wa-logs',
+            [$this, 'logs_page']
+        );
 
     }
 
@@ -102,5 +110,52 @@ class AskIViki_WA_Admin {
             'Test message triggered successfully.',
             'updated'
         );
+    }
+    public function logs_page()
+    {
+        global $wpdb;
+
+        $logs = $wpdb->get_results(
+            "SELECT *
+         FROM {$wpdb->prefix}askiviki_wa_logs
+         ORDER BY id DESC
+         LIMIT 100"
+        );
+
+        ?>
+        <div class="wrap">
+
+            <h1>WhatsApp Logs</h1>
+
+            <table class="widefat striped">
+
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <?php foreach ($logs as $log): ?>
+
+                    <tr>
+                        <td><?php echo esc_html($log->id); ?></td>
+                        <td><?php echo esc_html($log->phone); ?></td>
+                        <td><?php echo esc_html($log->status); ?></td>
+                        <td><?php echo esc_html($log->created_at); ?></td>
+                    </tr>
+
+                <?php endforeach; ?>
+
+                </tbody>
+
+            </table>
+
+        </div>
+        <?php
     }
 }
