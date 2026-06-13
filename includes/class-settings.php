@@ -46,6 +46,30 @@ class AskIViki_WA_Settings {
             'askiviki-whatsapp',
             'askiviki_wa_main'
         );
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_phone_id'
+        );
+
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_access_token'
+        );
+        add_settings_field(
+            'askiviki_wa_phone_id',
+            'Phone Number ID',
+            [$this, 'phone_id_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
+
+        add_settings_field(
+            'askiviki_wa_access_token',
+            'Access Token',
+            [$this, 'access_token_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
     }
 
     public function phone_field() {
@@ -68,5 +92,24 @@ class AskIViki_WA_Settings {
             name="askiviki_wa_test_number"
             value="' . esc_attr($value) . '"
             class="regular-text">';
+    }
+    public function phone_id_field()
+    {
+        $value = get_option('askiviki_wa_phone_id', '');
+
+        echo '<input type="text"
+        name="askiviki_wa_phone_id"
+        value="' . esc_attr($value) . '"
+        class="regular-text">';
+    }
+
+    public function access_token_field()
+    {
+        $value = get_option('askiviki_wa_access_token', '');
+
+        echo '<input type="password"
+        name="askiviki_wa_access_token"
+        value="' . esc_attr($value) . '"
+        class="regular-text">';
     }
 }
