@@ -26,9 +26,15 @@ class AskIViki_WA_WooCommerce_Hooks
 
     public function order_processing($order_id)
     {
+        if (
+            get_option(
+                'askiviki_wa_notify_processing',
+                'yes'
+            ) !== 'yes'
+        ) {
+            return;
+        }
         $order = wc_get_order($order_id);
-
-        $phone = $order->get_billing_phone();
 
         $message = sprintf(
             "Hi %s,\n\nYour order #%s is now Processing.\n\nTotal: ₹%s",
@@ -37,15 +43,22 @@ class AskIViki_WA_WooCommerce_Hooks
             number_format((float) $order->get_total(), 2)
         );
 
-        $service = new AskIViki_WA_Service();
-        $service->send_message($phone, $message);
+        $this->send_order_message(
+            $order,
+            $message
+        );
     }
-
     public function order_completed($order_id)
     {
+        if (
+            get_option(
+                'askiviki_wa_notify_completed',
+                'yes'
+            ) !== 'yes'
+        ) {
+            return;
+        }
         $order = wc_get_order($order_id);
-
-        $phone = $order->get_billing_phone();
 
         $message = sprintf(
             "Hi %s,\n\nYour order #%s has been Completed.\n\nThank you for shopping with us.",
@@ -53,15 +66,22 @@ class AskIViki_WA_WooCommerce_Hooks
             $order->get_order_number()
         );
 
-        $service = new AskIViki_WA_Service();
-        $service->send_message($phone, $message);
+        $this->send_order_message(
+            $order,
+            $message
+        );
     }
-
     public function order_cancelled($order_id)
     {
+        if (
+            get_option(
+                'askiviki_wa_notify_cancelled',
+                'yes'
+            ) !== 'yes'
+        ) {
+            return;
+        }
         $order = wc_get_order($order_id);
-
-        $phone = $order->get_billing_phone();
 
         $message = sprintf(
             "Hi %s,\n\nYour order #%s has been Cancelled.",
@@ -69,6 +89,22 @@ class AskIViki_WA_WooCommerce_Hooks
             $order->get_order_number()
         );
 
+        $this->send_order_message(
+            $order,
+            $message
+        );
+    }
+    private function send_order_message($order, $message)
+    {
+        if (!$order) {
+            return;
+        }
+
+        $phone = $order->get_billing_phone();
+
+        if (empty($phone)) {
+            return;
+        }
         $service = new AskIViki_WA_Service();
         $service->send_message($phone, $message);
     }
