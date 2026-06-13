@@ -9,6 +9,10 @@ class AskIViki_WA_WooCommerce_Hooks
     public function __construct()
     {
         add_action(
+            'woocommerce_new_order',
+            [$this, 'admin_new_order']
+        );
+        add_action(
             'woocommerce_order_status_processing',
             [$this, 'order_processing']
         );
@@ -144,6 +148,45 @@ class AskIViki_WA_WooCommerce_Hooks
                 ucfirst($status)
             ],
             $template
+        );
+    }
+    public function admin_new_order($order_id)
+    {
+        if (
+            get_option(
+                'askiviki_wa_admin_notifications',
+                'yes'
+            ) !== 'yes'
+        ) {
+            return;
+        }
+
+        $order = wc_get_order($order_id);
+
+        if (!$order) {
+            return;
+        }
+
+        $admin_phone = get_option(
+            'askiviki_wa_phone'
+        );
+
+        $message = sprintf(
+            "🛒 New Order Received\n\nOrder: #%s\nCustomer: %s\nPhone: %s\nTotal: ₹%s",
+            $order->get_order_number(),
+            $order->get_billing_first_name(),
+            $order->get_billing_phone(),
+            number_format(
+                (float)$order->get_total(),
+                2
+            )
+        );
+
+        $service = new AskIViki_WA_Service();
+
+        $service->send_message(
+            $admin_phone,
+            $message
         );
     }
 }
