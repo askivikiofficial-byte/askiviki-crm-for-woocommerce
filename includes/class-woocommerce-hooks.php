@@ -36,11 +36,14 @@ class AskIViki_WA_WooCommerce_Hooks
         }
         $order = wc_get_order($order_id);
 
-        $message = sprintf(
-            "Hi %s,\n\nYour order #%s is now Processing.\n\nTotal: ₹%s",
-            $order->get_billing_first_name(),
-            $order->get_order_number(),
-            number_format((float) $order->get_total(), 2)
+        $template = get_option(
+            'askiviki_wa_processing_template'
+        );
+
+        $message = $this->parse_template(
+            $template,
+            $order,
+            'processing'
         );
 
         $this->send_order_message(
@@ -60,10 +63,14 @@ class AskIViki_WA_WooCommerce_Hooks
         }
         $order = wc_get_order($order_id);
 
-        $message = sprintf(
-            "Hi %s,\n\nYour order #%s has been Completed.\n\nThank you for shopping with us.",
-            $order->get_billing_first_name(),
-            $order->get_order_number()
+        $template = get_option(
+            'askiviki_wa_completed_template'
+        );
+
+        $message = $this->parse_template(
+            $template,
+            $order,
+            'completed'
         );
 
         $this->send_order_message(
@@ -83,10 +90,14 @@ class AskIViki_WA_WooCommerce_Hooks
         }
         $order = wc_get_order($order_id);
 
-        $message = sprintf(
-            "Hi %s,\n\nYour order #%s has been Cancelled.",
-            $order->get_billing_first_name(),
-            $order->get_order_number()
+        $template = get_option(
+            'askiviki_wa_cancelled_template'
+        );
+
+        $message = $this->parse_template(
+            $template,
+            $order,
+            'cancelled'
         );
 
         $this->send_order_message(
@@ -107,5 +118,32 @@ class AskIViki_WA_WooCommerce_Hooks
         }
         $service = new AskIViki_WA_Service();
         $service->send_message($phone, $message);
+    }
+    private function parse_template(
+        $template,
+        $order,
+        $status
+    )
+    {
+        return str_replace(
+            [
+                '{customer_name}',
+                '{order_id}',
+                '{order_total}',
+                '{site_name}',
+                '{status}'
+            ],
+            [
+                $order->get_billing_first_name(),
+                $order->get_order_number(),
+                number_format(
+                    (float)$order->get_total(),
+                    2
+                ),
+                get_bloginfo('name'),
+                ucfirst($status)
+            ],
+            $template
+        );
     }
 }

@@ -118,6 +118,43 @@ class AskIViki_WA_Settings {
             'askiviki-whatsapp',
             'askiviki_wa_main'
         );
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_processing_template'
+        );
+
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_completed_template'
+        );
+
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_cancelled_template'
+        );
+        add_settings_field(
+            'askiviki_wa_processing_template',
+            'Processing Template',
+            [$this, 'processing_template_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
+
+        add_settings_field(
+            'askiviki_wa_completed_template',
+            'Completed Template',
+            [$this, 'completed_template_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
+
+        add_settings_field(
+            'askiviki_wa_cancelled_template',
+            'Cancelled Template',
+            [$this, 'cancelled_template_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
     }
 
     public function phone_field() {
@@ -225,6 +262,84 @@ class AskIViki_WA_Settings {
             <?php checked($value, 'yes'); ?>
         >
         Enable WhatsApp Notifications
+        <?php
+    }
+    public function processing_template_field()
+    {
+        $value = get_option(
+            'askiviki_wa_processing_template',
+            "Hi {customer_name},
+
+Your order #{order_id} is now Processing.
+
+Total: ₹{order_total}"
+        );
+
+        ?>
+        <textarea
+            name="askiviki_wa_processing_template"
+            rows="6"
+            cols="70"><?php echo esc_textarea($value); ?></textarea>
+
+        <p class="description">
+            Variables:
+            {customer_name},
+            {order_id},
+            {order_total},
+            {site_name}
+        </p>
+        <?php
+    }
+    public function completed_template_field()
+    {
+        $value = get_option(
+            'askiviki_wa_completed_template',
+            "Hi {customer_name},
+
+Your order #{order_id} is now Completed.
+
+Total: ₹{order_total}"
+        );
+
+        ?>
+        <textarea
+            name="askiviki_wa_completed_template"
+            rows="6"
+            cols="70"><?php echo esc_textarea($value); ?></textarea>
+
+        <p class="description">
+            Variables:
+            {customer_name},
+            {order_id},
+            {order_total},
+            {site_name}
+        </p>
+        <?php
+    }
+    public function cancelled_template_field()
+    {
+        $value = get_option(
+            'askiviki_wa_cancelled_template',
+            "Hi {customer_name},
+
+Your order #{order_id} is now Cancelled.
+
+Total: ₹{order_total}"
+        );
+
+        ?>
+        <textarea
+            name="askiviki_wa_cancelled_template"
+            rows="6"
+            cols="70"><?php echo esc_textarea($value); ?></textarea>
+
+        <p class="description">
+            Variables:
+            {customer_name},
+            {order_id},
+            {order_total},
+            {site_name}
+        </p>
         <?php
     }
 }
