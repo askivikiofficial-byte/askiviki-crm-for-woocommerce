@@ -33,6 +33,19 @@ class AskIViki_WA_Settings {
             'askiviki-whatsapp',
             'askiviki_wa_main'
         );
+
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_test_number'
+        );
+
+        add_settings_field(
+            'askiviki_wa_test_number',
+            'Test Number',
+            [$this, 'test_number_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
     }
 
     public function phone_field() {
@@ -43,5 +56,17 @@ class AskIViki_WA_Settings {
                      name="askiviki_wa_phone"
                      value="' . esc_attr($value) . '"
                      class="regular-text">';
+    }
+    public function test_number_field()
+    {
+        $value = get_option(
+            'askiviki_wa_test_number',
+            ''
+        );
+
+        echo '<input type="text"
+            name="askiviki_wa_test_number"
+            value="' . esc_attr($value) . '"
+            class="regular-text">';
     }
 }
