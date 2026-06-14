@@ -359,9 +359,27 @@ class AskIViki_WA_Admin {
 
         foreach ($orders as $order) {
 
-            if (
-                $order->get_billing_phone() === $phone
-            ) {
+            $order_phone = preg_replace(
+                '/[^0-9]/',
+                '',
+                $order->get_billing_phone()
+            );
+
+            $chat_phone = preg_replace(
+                '/[^0-9]/',
+                '',
+                $phone
+            );
+
+            if (strlen($order_phone) === 10) {
+                $order_phone = '91' . $order_phone;
+            }
+
+            if (strlen($chat_phone) === 10) {
+                $chat_phone = '91' . $chat_phone;
+            }
+
+            if ($order_phone === $chat_phone) {
                 $customer_orders[] = $order;
             }
         }
@@ -450,77 +468,192 @@ class AskIViki_WA_Admin {
                 Conversation:
                 <?php echo esc_html($phone); ?>
             </h1>
-
-            <div style="
+            <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:20px;">
+                <div style="
+            flex:1 1 350px;
+            min-width:300px;
             background:#fff;
             padding:20px;
             border:1px solid #ddd;
             margin-bottom:20px;
         ">
 
-                <h2>Customer Profile</h2>
-
-                <p>
-                    <strong>Name:</strong>
-                    <?php echo esc_html(
-                        $customer_name ?: 'Unknown'
-                    ); ?>
-                </p>
-
-                <p>
-                    <strong>Phone:</strong>
-                    <?php echo esc_html($phone); ?>
-                </p>
-
-                <p>
-                    <strong>Total Orders:</strong>
-                    <?php echo esc_html(
-                        $total_orders
-                    ); ?>
-                </p>
-
-                <p>
-                    <strong>Total Spend:</strong>
-                    ₹<?php echo esc_html(
-                        number_format(
-                            $total_spend,
-                            2
-                        )
-                    ); ?>
-                </p>
-
-                <?php if ($last_order): ?>
+                    <h2>Customer Profile</h2>
 
                     <p>
-                        <strong>Last Order:</strong>
-                        #<?php echo esc_html(
-                            $last_order->get_order_number()
+                        <strong>Name:</strong>
+                        <?php echo esc_html(
+                            $customer_name ?: 'Unknown'
                         ); ?>
                     </p>
 
                     <p>
-                        <strong>Status:</strong>
+                        <strong>Phone:</strong>
+                        <?php echo esc_html($phone); ?>
+                    </p>
+
+                    <p>
+                        <strong>Total Orders:</strong>
                         <?php echo esc_html(
-                            wc_get_order_status_name(
-                                $last_order->get_status()
+                            $total_orders
+                        ); ?>
+                    </p>
+
+                    <p>
+                        <strong>Total Spend:</strong>
+                        ₹<?php echo esc_html(
+                            number_format(
+                                $total_spend,
+                                2
                             )
                         ); ?>
                     </p>
 
-                    <p>
-                        <a
+                    <?php if ($last_order): ?>
+
+                        <p>
+                            <strong>Last Order:</strong>
+                            #<?php echo esc_html(
+                                $last_order->get_order_number()
+                            ); ?>
+                        </p>
+
+                        <p>
+                            <strong>Status:</strong>
+                            <?php echo esc_html(
+                                wc_get_order_status_name(
+                                    $last_order->get_status()
+                                )
+                            ); ?>
+                        </p>
+
+                        <p>
+                            <a
                                 class="button"
                                 href="<?php echo admin_url(
                                     'post.php?post=' .
                                     $last_order->get_id() .
                                     '&action=edit'
                                 ); ?>">
-                            View Order
-                        </a>
-                    </p>
+                                View Order
+                            </a>
+                        </p>
 
-                <?php endif; ?>
+                    <?php endif; ?>
 
+                </div>
+                <div style="
+            flex:2 1 700px;
+            min-width:300px;
+    background:#fff;
+    padding:20px;
+    border:1px solid #ddd;
+    margin-bottom:20px;
+">
+
+                    <h2>Order History</h2>
+
+                    <?php if (empty($customer_orders)) : ?>
+
+                        <p>No orders found.</p>
+
+                    <?php else : ?>
+                        <p>
+
+                            <strong>
+                                Total Orders:
+                            </strong>
+
+                            <?php echo esc_html(
+                                $total_orders
+                            ); ?>
+
+                        </p>
+                        <div style="overflow-x:auto;">
+                            <table class="widefat striped">
+
+                                <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Total</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+
+                                <?php foreach (
+                                    array_reverse($customer_orders)
+                                    as $order
+                                ) : ?>
+
+                                    <tr>
+
+                                        <td>
+                                            #<?php echo esc_html(
+                                                $order->get_order_number()
+                                            ); ?>
+                                        </td>
+
+                                        <td>
+                                            <?php echo esc_html(
+                                                $order->get_date_created()
+                                                    ? $order->get_date_created()->date(
+                                                    'Y-m-d'
+                                                )
+                                                    : '-'
+                                            ); ?>
+                                        </td>
+
+                                        <td>
+                                        <span class="button">
+                                            <?php echo esc_html(
+                                                wc_get_order_status_name(
+                                                    $order->get_status()
+                                                )
+                                            ); ?>
+                                        </span>
+                                        </td>
+
+                                        <td>
+                                            ₹<?php echo esc_html(
+                                                number_format(
+                                                    (float)$order->get_total(),
+                                                    2
+                                                )
+                                            ); ?>
+                                        </td>
+
+                                        <td>
+
+                                            <a
+                                                class="button"
+                                                href="<?php echo admin_url(
+                                                    'post.php?post=' .
+                                                    $order->get_id() .
+                                                    '&action=edit'
+                                                ); ?>">
+
+                                                View
+
+                                            </a>
+
+                                        </td>
+
+                                    </tr>
+
+                                <?php endforeach; ?>
+
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
             </div>
 
             <div style="
@@ -528,6 +661,8 @@ class AskIViki_WA_Admin {
             background:#fff;
             padding:20px;
             border:1px solid #ddd;
+            max-height:500px;
+            overflow-y:auto;
         ">
 
                 <?php if (empty($messages)) : ?>
