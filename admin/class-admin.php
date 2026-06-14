@@ -238,8 +238,7 @@ class AskIViki_WA_Admin {
                 $note_a = $wpdb->get_row( $wpdb->prepare(
                             "
                                     SELECT *
-                                    FROM {$wpdb->prefix}
-                                    askiviki_wa_customer_notes
+                                    FROM {$wpdb->prefix}askiviki_wa_customer_notes
                                     WHERE phone = %s
                                     LIMIT 1
                                     ",
@@ -249,8 +248,7 @@ class AskIViki_WA_Admin {
                 $note_b = $wpdb->get_row( $wpdb->prepare(
                             "
                                     SELECT *
-                                    FROM {$wpdb->prefix}
-                                    askiviki_wa_customer_notes
+                                    FROM {$wpdb->prefix}askiviki_wa_customer_notes
                                     WHERE phone = %s
                                     LIMIT 1
                                     ",
@@ -1361,8 +1359,7 @@ class AskIViki_WA_Admin {
         if ($existing) {
 
             $wpdb->update(
-                $wpdb->prefix .
-                'askiviki_wa_customer_notes',
+                $wpdb->prefix .'askiviki_wa_customer_notes',
                 [
                     'tags' => $tags,
                     'notes' => $notes,
@@ -1380,8 +1377,7 @@ class AskIViki_WA_Admin {
         } else {
 
             $wpdb->insert(
-                $wpdb->prefix .
-                'askiviki_wa_customer_notes',
+                $wpdb->prefix .'askiviki_wa_customer_notes',
                 [
                     'phone' => $phone,
                     'tags' => $tags,
