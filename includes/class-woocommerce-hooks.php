@@ -42,21 +42,47 @@ class AskIViki_WA_WooCommerce_Hooks
 
         $service = new AskIViki_WA_Service();
 
-        $service->send_template_message(
+        $sent = $service->send_template_message(
             $order->get_billing_phone(),
             get_option(
                 'askiviki_wa_processing_template_name',
                 'order_processing'
             ),
             [
-                'customer_name' => $order->get_billing_first_name(),
-                'order_id'      => $order->get_order_number(),
-                'order_total'   => number_format(
-                    (float)$order->get_total(),
-                    2
-                )
+                'customer_name' =>
+                    $order->get_billing_first_name(),
+
+                'order_id' =>
+                    $order->get_order_number(),
+
+                'order_total' =>
+                    number_format(
+                        (float)$order->get_total(),
+                        2
+                    )
             ]
         );
+        if (!$sent) {
+
+            error_log(
+                '[AskIViki] Processing fallback triggered'
+            );
+
+            $template = get_option(
+                'askiviki_wa_processing_template'
+            );
+
+            $message = $this->parse_template(
+                $template,
+                $order,
+                'processing'
+            );
+
+            $service->send_message(
+                $order->get_billing_phone(),
+                $message
+            );
+        }
     }
     public function order_completed($order_id)
     {
@@ -72,21 +98,47 @@ class AskIViki_WA_WooCommerce_Hooks
 
         $service = new AskIViki_WA_Service();
 
-        $service->send_template_message(
+        $sent = $service->send_template_message(
             $order->get_billing_phone(),
             get_option(
                 'askiviki_wa_completed_template_name',
                 'order_completed'
             ),
             [
-                'customer_name' => $order->get_billing_first_name(),
-                'order_id'      => $order->get_order_number(),
-                'order_total'   => number_format(
-                    (float)$order->get_total(),
-                    2
-                )
+                'customer_name' =>
+                    $order->get_billing_first_name(),
+
+                'order_id' =>
+                    $order->get_order_number(),
+
+                'order_total' =>
+                    number_format(
+                        (float)$order->get_total(),
+                        2
+                    )
             ]
         );
+        if (!$sent) {
+
+            error_log(
+                '[AskIViki] Completed fallback triggered'
+            );
+
+            $template = get_option(
+                'askiviki_wa_completed_template'
+            );
+
+            $message = $this->parse_template(
+                $template,
+                $order,
+                'completed'
+            );
+
+            $service->send_message(
+                $order->get_billing_phone(),
+                $message
+            );
+        }
     }
     public function order_cancelled($order_id)
     {
@@ -102,21 +154,47 @@ class AskIViki_WA_WooCommerce_Hooks
 
         $service = new AskIViki_WA_Service();
 
-        $service->send_template_message(
+        $sent = $service->send_template_message(
             $order->get_billing_phone(),
             get_option(
                 'askiviki_wa_cancelled_template_name',
                 'order_cancelled'
             ),
             [
-                'customer_name' => $order->get_billing_first_name(),
-                'order_id'      => $order->get_order_number(),
-                'order_total'   => number_format(
-                    (float)$order->get_total(),
-                    2
-                )
+                'customer_name' =>
+                    $order->get_billing_first_name(),
+
+                'order_id' =>
+                    $order->get_order_number(),
+
+                'order_total' =>
+                    number_format(
+                        (float)$order->get_total(),
+                        2
+                    )
             ]
         );
+        if (!$sent) {
+
+            error_log(
+                '[AskIViki] Cancelled fallback triggered'
+            );
+
+            $template = get_option(
+                'askiviki_wa_cancelled_template'
+            );
+
+            $message = $this->parse_template(
+                $template,
+                $order,
+                'cancelled'
+            );
+
+            $service->send_message(
+                $order->get_billing_phone(),
+                $message
+            );
+        }
     }
     private function send_order_message($order, $message)
     {

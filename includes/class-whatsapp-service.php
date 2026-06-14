@@ -146,10 +146,6 @@ class AskIViki_WA_Service
             ]
         ];
 
-        error_log(
-            '[AskIViki Template Body] ' .
-            wp_json_encode($body)
-        );
         $response = wp_remote_post(
             "https://graph.facebook.com/v25.0/{$phone_id}/messages",
             [
@@ -200,12 +196,20 @@ class AskIViki_WA_Service
             return false;
         }
 
-        $code =
-            wp_remote_retrieve_response_code(
-                $response
+        $code = wp_remote_retrieve_response_code(
+            $response
+        );
+
+        if ($code < 200 || $code >= 300) {
+
+            error_log(
+                '[AskIViki] Template send failed'
             );
 
-        return $code >= 200 && $code < 300;
+            return false;
+        }
+
+        return true;
     }
     public function send_template(
         $phone,
