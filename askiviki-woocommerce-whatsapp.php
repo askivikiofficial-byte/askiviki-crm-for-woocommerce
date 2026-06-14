@@ -20,10 +20,12 @@ require_once plugin_dir_path(__FILE__) . 'admin/class-admin.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-whatsapp-service.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-woocommerce-hooks.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-webhook.php';
 
 new AskIViki_WA_Admin();
 new AskIViki_WA_Settings();
 new AskIViki_WA_WooCommerce_Hooks();
+new AskIViki_WA_Webhook();
 
 register_activation_hook(
     __FILE__,
