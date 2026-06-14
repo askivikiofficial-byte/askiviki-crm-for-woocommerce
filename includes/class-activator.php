@@ -58,6 +58,12 @@ class AskIViki_WA_Activator {
         
         notes LONGTEXT NULL,
         
+        is_vip TINYINT(1) DEFAULT 0,
+        
+        priority_level VARCHAR(20) DEFAULT 'normal',
+        
+        is_pinned TINYINT(1) DEFAULT 0,
+        
         created_at DATETIME NOT NULL,
         
         updated_at DATETIME NULL,
