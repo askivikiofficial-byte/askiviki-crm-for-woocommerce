@@ -16,6 +16,10 @@ class AskIViki_WA_Admin {
             'admin_init',
             [$this, 'handle_reply']
         );
+        add_action(
+            'admin_init',
+            [$this, 'save_customer_note']
+        );
     }
 
     public function register_menu() {
@@ -440,6 +444,19 @@ class AskIViki_WA_Admin {
                     : 0;
         }
 
+        $customer_note =
+            $wpdb->get_row(
+                $wpdb->prepare(
+                    "
+            SELECT *
+            FROM {$wpdb->prefix}
+            askiviki_wa_customer_notes
+            WHERE phone = %s
+            LIMIT 1
+            ",
+                    $phone
+                )
+            );
         $table = $wpdb->prefix . 'askiviki_wa_messages';
 
         $messages = [];
@@ -467,6 +484,15 @@ class AskIViki_WA_Admin {
 
                 <div class="notice notice-success is-dismissible">
                     <p>Reply sent successfully.</p>
+                </div>
+
+            <?php endif; ?>
+            <?php if (isset($_GET['note_saved'])) : ?>
+
+                <div class="notice notice-success is-dismissible">
+                    <p>
+                        Customer notes saved.
+                    </p>
                 </div>
 
             <?php endif; ?>
@@ -739,6 +765,83 @@ class AskIViki_WA_Admin {
             </div>
 
             <div style="
+    background:#fff;
+    padding:20px;
+    border:1px solid #ddd;
+    margin-bottom:20px;
+">
+
+                <h2>Internal Notes & Tags</h2>
+
+                <form method="post">
+
+                    <?php wp_nonce_field(
+                        'askiviki_save_customer_note',
+                        'askiviki_note_nonce'
+                    ); ?>
+
+                    <input
+                            type="hidden"
+                            name="customer_phone"
+                            value="<?php echo esc_attr(
+                                $phone
+                            ); ?>">
+
+                    <p>
+
+                        <label>
+                            <strong>Tags</strong>
+                        </label>
+
+                        <br>
+
+                        <input
+                                type="text"
+                                name="customer_tags"
+                                style="width:100%;"
+                                value="<?php echo esc_attr(
+                                    $customer_note->tags ?? ''
+                                ); ?>"
+                                placeholder="VIP, Frequent Buyer">
+
+                    </p>
+
+                    <p>
+
+                        <label>
+                            <strong>Internal Notes</strong>
+                        </label>
+
+                        <br>
+
+                        <textarea
+                                name="customer_notes"
+                                rows="8"
+                                style="width:100%;"><?php
+
+                            echo esc_textarea(
+                                $customer_note->notes ?? ''
+                            );
+
+                            ?></textarea>
+
+                    </p>
+
+                    <p>
+
+                        <input
+                                type="submit"
+                                name="askiviki_save_note"
+                                class="button button-primary"
+                                value="Save Notes">
+
+                    </p>
+
+                </form>
+
+            </div>
+
+            <div style="
             max-width:800px;
             background:#fff;
             padding:20px;
@@ -841,5 +944,98 @@ class AskIViki_WA_Admin {
         </div>
 
         <?php
+    }
+    public function save_customer_note()
+    {
+        if (
+        !isset(
+            $_POST['askiviki_save_note']
+        )
+        ) {
+            return;
+        }
+
+        if (
+        !wp_verify_nonce(
+            $_POST['askiviki_note_nonce'],
+            'askiviki_save_customer_note'
+        )
+        ) {
+            return;
+        }
+
+        global $wpdb;
+
+        $phone = sanitize_text_field(
+            $_POST['customer_phone']
+        );
+
+        $tags = sanitize_text_field(
+            $_POST['customer_tags']
+        );
+
+        $notes = sanitize_textarea_field(
+            $_POST['customer_notes']
+        );
+
+        $existing =
+            $wpdb->get_var(
+                $wpdb->prepare(
+                    "
+                SELECT id
+                FROM {$wpdb->prefix}
+                askiviki_wa_customer_notes
+                WHERE phone = %s
+                ",
+                    $phone
+                )
+            );
+
+        if ($existing) {
+
+            $wpdb->update(
+                $wpdb->prefix .
+                'askiviki_wa_customer_notes',
+                [
+                    'tags' => $tags,
+                    'notes' => $notes,
+                    'updated_at' =>
+                        current_time('mysql')
+                ],
+                [
+                    'id' => $existing
+                ]
+            );
+
+        } else {
+
+            $wpdb->insert(
+                $wpdb->prefix .
+                'askiviki_wa_customer_notes',
+                [
+                    'phone' => $phone,
+                    'tags' => $tags,
+                    'notes' => $notes,
+                    'created_at' =>
+                        current_time('mysql')
+                ]
+            );
+        }
+
+        wp_redirect(
+            add_query_arg(
+                [
+                    'page' =>
+                        'askiviki-conversation',
+                    'phone' => $phone,
+                    'note_saved' => 1
+                ],
+                admin_url(
+                    'admin.php'
+                )
+            )
+        );
+
+        exit;
     }
 }
