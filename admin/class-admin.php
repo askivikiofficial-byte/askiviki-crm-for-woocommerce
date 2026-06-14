@@ -44,6 +44,14 @@ class AskIViki_WA_Admin {
             'askiviki-wa-inbox',
             [$this, 'inbox_page']
         );
+        add_submenu_page(
+            'woocommerce',
+            'Conversation',
+            'Conversation',
+            'manage_options',
+            'askiviki-conversation',
+            [$this, 'conversation_page']
+        );
 
     }
 
@@ -219,7 +227,20 @@ class AskIViki_WA_Admin {
 
                     <tr>
                         <td><?php echo esc_html($message->id); ?></td>
-                        <td><?php echo esc_html($message->phone); ?></td>
+                        <td>
+
+                            <a href="<?php echo admin_url(
+                                'admin.php?page=askiviki-conversation&phone=' .
+                                urlencode($message->phone)
+                            ); ?>">
+
+                                <?php echo esc_html(
+                                    $message->phone
+                                ); ?>
+
+                            </a>
+
+                        </td>
                         <td><?php echo esc_html($message->message); ?></td>
                         <td><?php echo esc_html($message->message_type); ?></td>
                         <td><?php echo esc_html($message->created_at); ?></td>
@@ -291,6 +312,19 @@ class AskIViki_WA_Admin {
             $phone,
             $message
         );
+        global $wpdb;
+
+        $wpdb->insert(
+            $wpdb->prefix .
+            'askiviki_wa_messages',
+            [
+                'wa_id'       => '',
+                'phone'       => $phone,
+                'message'     => $message,
+                'message_type'=> 'admin_reply',
+                'created_at'  => current_time('mysql')
+            ]
+        );
 
         wp_redirect(
             add_query_arg(
@@ -303,5 +337,98 @@ class AskIViki_WA_Admin {
             )
         );
         exit;
+    }
+    public function conversation_page()
+    {
+        global $wpdb;
+
+        $phone = sanitize_text_field(
+            $_GET['phone'] ?? ''
+        );
+        error_log(
+            '[AskIViki Conversation Phone] ' .
+            $phone
+        );
+
+        $table = $wpdb->prefix . 'askiviki_wa_messages';
+
+        $messages = $wpdb->get_results(
+            $wpdb->prepare(
+                    "
+            SELECT *
+            FROM {$table}
+            WHERE phone = %s
+            ORDER BY created_at ASC
+            ",
+                    $phone
+                )
+            );
+        ?>
+        <div class="wrap">
+
+            <h1>
+                Conversation:
+                <?php echo esc_html($phone); ?>
+            </h1>
+
+            <div style="
+    max-width:800px;
+    background:#fff;
+    padding:20px;
+">
+
+                <?php foreach ($messages as $message): ?>
+
+                    <div style="
+                        margin:10px 0;
+                        padding:10px;
+                        border-radius:10px;
+                        background:
+                    <?php echo
+                    $message->message_type ===
+                    'admin_reply'
+                        ? '#dcf8c6'
+                        : '#f1f1f1';
+                    ?>;
+                        text-align:
+                    <?php echo
+                    $message->message_type ===
+                    'admin_reply'
+                        ? 'right'
+                        : 'left';
+                    ?>;;
+                        ">
+
+                        <strong>
+
+                            <?php echo
+                            $message->message_type ===
+                            'admin_reply'
+                                ? 'Admin'
+                                : 'Customer';
+                            ?>
+
+                        </strong>
+
+                        <br>
+
+                        <?php echo esc_html(
+                            $message->message
+                        ); ?>
+
+                        <small>
+                            <?php echo esc_html(
+                                $message->created_at
+                            ); ?>
+                        </small>
+
+                    </div>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        </div>
+        <?php
     }
 }
