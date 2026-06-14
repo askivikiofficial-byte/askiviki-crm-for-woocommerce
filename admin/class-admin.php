@@ -32,6 +32,14 @@ class AskIViki_WA_Admin {
             'askiviki-wa-logs',
             [$this, 'logs_page']
         );
+        add_submenu_page(
+            'woocommerce',
+            'WhatsApp Inbox',
+            'WhatsApp Inbox',
+            'manage_options',
+            'askiviki-wa-inbox',
+            [$this, 'inbox_page']
+        );
 
     }
 
@@ -154,6 +162,54 @@ class AskIViki_WA_Admin {
                         <td><?php echo esc_html($log->status); ?></td>
                         <td><?php echo esc_html($log->message_id); ?></td>
                         <td><?php echo esc_html($log->created_at); ?></td>
+                    </tr>
+
+                <?php endforeach; ?>
+
+                </tbody>
+
+            </table>
+
+        </div>
+        <?php
+    }
+    public function inbox_page()
+    {
+        global $wpdb;
+
+        $messages = $wpdb->get_results(
+            "SELECT *
+        FROM {$wpdb->prefix}askiviki_wa_messages
+        ORDER BY created_at DESC
+        LIMIT 100"
+        );
+        ?>
+        <div class="wrap">
+
+            <h1>WhatsApp Inbox</h1>
+
+            <table class="widefat striped">
+
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Phone</th>
+                    <th>Message</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <?php foreach ($messages as $message): ?>
+
+                    <tr>
+                        <td><?php echo esc_html($message->id); ?></td>
+                        <td><?php echo esc_html($message->phone); ?></td>
+                        <td><?php echo esc_html($message->message); ?></td>
+                        <td><?php echo esc_html($message->message_type); ?></td>
+                        <td><?php echo esc_html($message->created_at); ?></td>
                     </tr>
 
                 <?php endforeach; ?>

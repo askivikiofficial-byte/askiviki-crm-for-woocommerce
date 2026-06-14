@@ -28,6 +28,21 @@ class AskIViki_WA_Activator {
         PRIMARY KEY (id)
     ) $charset_collate;";
 
+        $messages_table =
+            $wpdb->prefix .
+            'askiviki_wa_messages';
+
+        $sql .= "CREATE TABLE $messages_table (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        wa_id VARCHAR(255) NOT NULL,
+        customer_name VARCHAR(255) NULL,
+        phone VARCHAR(30) NOT NULL,
+        message LONGTEXT NOT NULL,
+        message_type VARCHAR(50) DEFAULT 'text',
+        created_at DATETIME NOT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
+
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
         dbDelta($sql);
