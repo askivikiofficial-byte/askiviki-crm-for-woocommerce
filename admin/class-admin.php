@@ -234,6 +234,59 @@ class AskIViki_WA_Admin {
                 )
             );
         }
+        usort($messages, function ( $a,$b) use ($wpdb) {
+                $note_a = $wpdb->get_row( $wpdb->prepare(
+                            "
+                                    SELECT *
+                                    FROM {$wpdb->prefix}
+                                    askiviki_wa_customer_notes
+                                    WHERE phone = %s
+                                    LIMIT 1
+                                    ",
+                                            $a->phone
+                                        )
+                                    );
+                $note_b = $wpdb->get_row( $wpdb->prepare(
+                            "
+                                    SELECT *
+                                    FROM {$wpdb->prefix}
+                                    askiviki_wa_customer_notes
+                                    WHERE phone = %s
+                                    LIMIT 1
+                                    ",
+                                            $b->phone
+                                        )
+                                    );
+
+                $score_a = 0;
+                $score_b = 0;
+            if ( $note_a && $note_a->is_pinned ) {
+                $score_a += 100;
+            }
+            if ( $note_b && $note_b->is_pinned ) {
+                $score_b += 100;
+            }
+            if ( $note_a && $note_a->priority_level === 'urgent' ) {
+                $score_a += 50;
+            }
+            if ( $note_b && $note_b->priority_level === 'urgent' ) {
+                $score_b += 50;
+            }
+            if ( $note_a && $note_a->priority_level === 'high' ) {
+                $score_a += 25;
+            }
+            if ( $note_b && $note_b->priority_level === 'high' ) {
+                $score_b += 25;
+            }
+            if ( $note_a && $note_a->is_vip ) {
+                $score_a += 10;
+            }
+            if ( $note_b && $note_b->is_vip ) {
+                $score_b += 10;
+            }
+            return $score_b <=> $score_a;
+        }
+        );
         $all_tags = $wpdb->get_col(
             "
     SELECT tags
@@ -702,40 +755,19 @@ class AskIViki_WA_Admin {
             border:1px solid #ddd;
             margin-bottom:20px;
         ">
-                    <?php if (!empty($customer_note->is_vip)) : ?>
-                        <span style="
-                    background:#f0b90b;
-                    color:#fff;
-                    padding:5px 10px;
-                    border-radius:20px;
-                    ">
-                    ⭐ VIP
-                </span>
-                    <?php endif; ?>
-                    <?php if ( ($customer_note->priority_level ?? '') === 'urgent' ) : ?>
-                        <span style="
-                    background:red;
-                    color:#fff;
-                    padding:5px 10px;
-                    border-radius:20px;
-                    ">
-
-                    🚨 Urgent
-
-                </span>
-                    <?php endif; ?>
-                    <?php if (!empty($customer_note->is_pinned)) : ?>
-                        <span style="
-                    background:#2271b1;
-                    color:#fff;
-                    padding:5px 10px;
-                    border-radius:20px;
-                    ">
-
-                    📌 Pinned
-
-                </span>
-                    <?php endif; ?>
+                    <?php
+                    if ( $customer_note && $customer_note->is_pinned ) {
+                        echo '📌 Pinned';
+                    } elseif ( $customer_note && $customer_note->priority_level === 'urgent' ) {
+                        echo '🚨 Urgent';
+                    } elseif ( $customer_note && $customer_note->priority_level === 'high' ) {
+                        echo '🔥 High';
+                    } elseif ( $customer_note && $customer_note->is_vip ) {
+                        echo '⭐ VIP';
+                    } else {
+                        echo 'Normal';
+                    }
+                    ?>
 
                     <h2>Customer Profile</h2>
 
