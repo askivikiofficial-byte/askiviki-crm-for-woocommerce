@@ -48,14 +48,29 @@ class AskIViki_WA_Service
                 'timeout' => 30
             ]
         );
+        $response_body = [];
+
+        if (!is_wp_error($response)) {
+
+            $response_body = json_decode(
+                wp_remote_retrieve_body($response),
+                true
+            );
+        }
+
+        $message_id = $response_body['messages'][0]['id'] ?? '';
+
+        $status = is_wp_error($response)
+            ? 'failed'
+            : 'sent';
+
         $this->save_log(
             null,
             $phone,
-            is_wp_error($response)
-                ? 'failed'
-                : 'sent',
+            $status,
             $message,
-            wp_remote_retrieve_body($response)
+            wp_remote_retrieve_body($response),
+            $message_id
         );
         if (is_wp_error($response)) {
             return false;
@@ -75,7 +90,7 @@ class AskIViki_WA_Service
 
         return $phone;
     }
-    private function save_log($order_id,$phone,$status,$message,$response)
+    private function save_log($order_id,$phone,$status,$message,$response,$message_id = '')
     {
         global $wpdb;
 
@@ -87,6 +102,7 @@ class AskIViki_WA_Service
                 'status'     => $status,
                 'message'    => $message,
                 'response'   => maybe_serialize($response),
+                'message_id' => $message_id,
                 'created_at' => current_time('mysql')
             ]
         );

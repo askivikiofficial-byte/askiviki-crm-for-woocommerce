@@ -146,6 +146,7 @@ class AskIViki_WA_Admin {
                         <td><?php echo esc_html($log->id); ?></td>
                         <td><?php echo esc_html($log->phone); ?></td>
                         <td><?php echo esc_html($log->status); ?></td>
+                        <td><?php echo esc_html($log->message_id); ?></td>
                         <td><?php echo esc_html($log->created_at); ?></td>
                     </tr>
 

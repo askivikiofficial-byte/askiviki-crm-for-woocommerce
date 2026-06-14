@@ -166,6 +166,17 @@ class AskIViki_WA_Settings {
             'askiviki-whatsapp',
             'askiviki_wa_main'
         );
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_verify_token'
+        );
+        add_settings_field(
+            'askiviki_wa_verify_token',
+            'Webhook Verify Token',
+            [$this, 'verify_token_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
     }
 
     public function phone_field() {
@@ -369,5 +380,18 @@ Total: ₹{order_total}"
         >
         Enable Admin Notifications
         <?php
+    }
+    public function verify_token_field()
+    {
+        $value = get_option(
+            'askiviki_wa_verify_token',
+            'askiviki-secret-2026'
+        );
+
+        echo '<input
+        type="text"
+        name="askiviki_wa_verify_token"
+        value="' . esc_attr($value) . '"
+        class="regular-text">';
     }
 }
