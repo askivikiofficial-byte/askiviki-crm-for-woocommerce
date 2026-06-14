@@ -234,6 +234,37 @@ class AskIViki_WA_Admin {
                 )
             );
         }
+        $attention =
+            sanitize_text_field(
+                $_GET['attention'] ?? ''
+            );
+        if ($attention === '1') {
+
+            $messages = array_filter(
+                $messages,
+                function ($message) use ($wpdb) {
+
+                    $unread = $wpdb->get_var(
+                        $wpdb->prepare(
+                            "
+                            SELECT COUNT(*)
+                            FROM {$wpdb->prefix}askiviki_wa_messages
+                            WHERE phone = %s
+                            AND is_read = 0
+                            ",
+                            $message->phone
+                        )
+                    );
+                    error_log(
+                        '[Attention Filter] Phone: ' .
+                        $message->phone .
+                        ' Unread: ' .
+                        $unread
+                    );
+                    return $unread > 0;
+                }
+            );
+        }
         usort($messages, function ( $a,$b) use ($wpdb) {
                 $note_a = $wpdb->get_row( $wpdb->prepare(
                             "
@@ -340,6 +371,17 @@ class AskIViki_WA_Admin {
         WHERE is_pinned = 1
         "
                 );
+
+            $unread_conversations =
+                (int) $wpdb->get_var(
+                    "
+        SELECT COUNT(
+            DISTINCT phone
+        )
+        FROM {$wpdb->prefix}askiviki_wa_messages
+        WHERE is_read = 0
+        "
+                );
             ?>
             <div style="display:flex;flex-wrap:wrap;gap:15px;flex-wrap:wrap;margin:20px 0;">
                 <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
@@ -372,6 +414,14 @@ class AskIViki_WA_Admin {
                     <?php echo esc_html(
                     $pinned_customers
                     ); ?>
+                    </p>
+                </div>
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                    <h3>🔴 Unread</h3>
+                    <p style="font-size:28px;font-weight:bold;margin:0;">
+                        <?php echo esc_html(
+                            $unread_conversations
+                        ); ?>
                     </p>
                 </div>
             </div>
@@ -435,6 +485,21 @@ class AskIViki_WA_Admin {
 
                 </select>
 
+                <select
+                        name="attention">
+
+                    <option value="">
+                        All Chats
+                    </option>
+
+                    <option
+                            value="1"
+                        <?php selected($attention, '1'); ?>>
+                        🔴 Attention Required
+                    </option>
+
+                </select>
+
                 <input
                         type="submit"
                         class="button"
@@ -490,13 +555,35 @@ class AskIViki_WA_Admin {
                                     $message->phone
                                 )
                             );
+
+                        $unread = $wpdb->get_var(
+                            $wpdb->prepare(
+                                "
+        SELECT COUNT(*)
+        FROM {$wpdb->prefix}askiviki_wa_messages
+        WHERE phone = %s
+        AND is_read = 0
+        ",
+                                $message->phone
+                            )
+                        );
                         ?>
                         <tr>
 
                             <td>
-                                <?php echo esc_html(
-                                    $message->phone
-                                ); ?>
+                                <?php echo esc_html($message->phone); ?>
+
+                                <?php if ($unread > 0) : ?>
+                                    <span style="
+                                        background:red;
+                                        color:#fff;
+                                        padding:2px 8px;
+                                        border-radius:20px;
+                                        margin-left:5px;
+                                    ">
+                                        Unread
+                                    </span>
+                                <?php endif; ?>
                             </td>
 
                             <td>
@@ -596,14 +683,22 @@ class AskIViki_WA_Admin {
         global $wpdb;
 
         $wpdb->insert(
-            $wpdb->prefix .
-            'askiviki_wa_messages',
+            $wpdb->prefix .'askiviki_wa_messages',
             [
                 'wa_id'       => '',
                 'phone'       => $phone,
                 'message'     => $message,
                 'message_type'=> 'admin_reply',
                 'created_at'  => current_time('mysql')
+            ]
+        );
+        $wpdb->update(
+            $wpdb->prefix .'askiviki_wa_messages',
+            [
+                'is_read' => 1
+            ],
+            [
+                'phone' => $phone
             ]
         );
 
@@ -625,6 +720,15 @@ class AskIViki_WA_Admin {
 
         $phone = sanitize_text_field(
             $_GET['phone'] ?? ''
+        );
+        $wpdb->update(
+            $wpdb->prefix .'askiviki_wa_messages',
+            [
+                'is_read' => 1
+            ],
+            [
+                'phone' => $phone
+            ]
         );
 
         $orders = wc_get_orders([

@@ -99,8 +99,7 @@ class AskIViki_WA_Webhook
         foreach ($messages as $message) {
 
             $result = $wpdb->insert(
-                $wpdb->prefix .
-                'askiviki_wa_messages',
+                $wpdb->prefix .'askiviki_wa_messages',
                 [
                     'wa_id' =>
                         $message['id'] ?? '',
@@ -115,6 +114,7 @@ class AskIViki_WA_Webhook
                     'message_type' =>
                         $message['type']
                         ?? 'text',
+                    'is_read' => 0,
 
                     'created_at' =>
                         current_time('mysql')

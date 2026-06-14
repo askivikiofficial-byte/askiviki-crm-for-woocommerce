@@ -29,8 +29,7 @@ class AskIViki_WA_Activator {
     ) $charset_collate;";
 
         $messages_table =
-            $wpdb->prefix .
-            'askiviki_wa_messages';
+            $wpdb->prefix .'askiviki_wa_messages';
 
         $sql .= "CREATE TABLE $messages_table (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -39,13 +38,13 @@ class AskIViki_WA_Activator {
         phone VARCHAR(30) NOT NULL,
         message LONGTEXT NOT NULL,
         message_type VARCHAR(50) DEFAULT 'text',
+        is_read TINYINT(1) DEFAULT 0,
         created_at DATETIME NOT NULL,
         PRIMARY KEY (id)
     ) $charset_collate;";
 
         $notes_table =
-            $wpdb->prefix .
-            'askiviki_wa_customer_notes';
+            $wpdb->prefix .'askiviki_wa_customer_notes';
 
         $sql .= "
         CREATE TABLE {$notes_table} (
