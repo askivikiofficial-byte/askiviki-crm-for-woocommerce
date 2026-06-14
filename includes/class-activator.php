@@ -43,6 +43,32 @@ class AskIViki_WA_Activator {
         PRIMARY KEY (id)
     ) $charset_collate;";
 
+        $notes_table =
+            $wpdb->prefix .
+            'askiviki_wa_customer_notes';
+
+        $sql .= "
+        CREATE TABLE {$notes_table} (
+        
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        
+        phone VARCHAR(30) NOT NULL,
+        
+        tags VARCHAR(255) NULL,
+        
+        notes LONGTEXT NULL,
+        
+        created_at DATETIME NOT NULL,
+        
+        updated_at DATETIME NULL,
+        
+        PRIMARY KEY (id),
+        
+        KEY phone (phone)
+        
+        ) {$charset_collate};
+        ";
+
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
         dbDelta($sql);
