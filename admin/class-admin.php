@@ -351,6 +351,46 @@ class AskIViki_WA_Admin {
             $_GET['phone'] ?? ''
         );
 
+        $orders = wc_get_orders([
+            'limit' => -1
+        ]);
+
+        $customer_orders = [];
+
+        foreach ($orders as $order) {
+
+            if (
+                $order->get_billing_phone() === $phone
+            ) {
+                $customer_orders[] = $order;
+            }
+        }
+
+        $total_orders = count(
+            $customer_orders
+        );
+
+        $total_spend = 0;
+
+        foreach ($customer_orders as $order) {
+
+            $total_spend +=
+                (float) $order->get_total();
+        }
+
+        $last_order = !empty($customer_orders)
+            ? end($customer_orders)
+            : null;
+
+        $customer_name = '';
+
+        if ($last_order) {
+
+            $customer_name =
+                $last_order
+                    ->get_formatted_billing_full_name();
+        }
+
         $table = $wpdb->prefix . 'askiviki_wa_messages';
 
         $messages = [];
@@ -369,6 +409,7 @@ class AskIViki_WA_Admin {
                 )
             );
         }
+
         ?>
 
         <div class="wrap">
@@ -409,6 +450,78 @@ class AskIViki_WA_Admin {
                 Conversation:
                 <?php echo esc_html($phone); ?>
             </h1>
+
+            <div style="
+            background:#fff;
+            padding:20px;
+            border:1px solid #ddd;
+            margin-bottom:20px;
+        ">
+
+                <h2>Customer Profile</h2>
+
+                <p>
+                    <strong>Name:</strong>
+                    <?php echo esc_html(
+                        $customer_name ?: 'Unknown'
+                    ); ?>
+                </p>
+
+                <p>
+                    <strong>Phone:</strong>
+                    <?php echo esc_html($phone); ?>
+                </p>
+
+                <p>
+                    <strong>Total Orders:</strong>
+                    <?php echo esc_html(
+                        $total_orders
+                    ); ?>
+                </p>
+
+                <p>
+                    <strong>Total Spend:</strong>
+                    ₹<?php echo esc_html(
+                        number_format(
+                            $total_spend,
+                            2
+                        )
+                    ); ?>
+                </p>
+
+                <?php if ($last_order): ?>
+
+                    <p>
+                        <strong>Last Order:</strong>
+                        #<?php echo esc_html(
+                            $last_order->get_order_number()
+                        ); ?>
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        <?php echo esc_html(
+                            wc_get_order_status_name(
+                                $last_order->get_status()
+                            )
+                        ); ?>
+                    </p>
+
+                    <p>
+                        <a
+                                class="button"
+                                href="<?php echo admin_url(
+                                    'post.php?post=' .
+                                    $last_order->get_id() .
+                                    '&action=edit'
+                                ); ?>">
+                            View Order
+                        </a>
+                    </p>
+
+                <?php endif; ?>
+
+            </div>
 
             <div style="
             max-width:800px;
