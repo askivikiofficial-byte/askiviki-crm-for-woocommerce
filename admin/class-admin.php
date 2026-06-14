@@ -45,7 +45,7 @@ class AskIViki_WA_Admin {
             [$this, 'inbox_page']
         );
         add_submenu_page(
-            'woocommerce',
+            null,
             'Conversation',
             'Conversation',
             'manage_options',
@@ -190,10 +190,18 @@ class AskIViki_WA_Admin {
         global $wpdb;
 
         $messages = $wpdb->get_results(
-            "SELECT *
-        FROM {$wpdb->prefix}askiviki_wa_messages
-        ORDER BY created_at DESC
-        LIMIT 100"
+            "
+            SELECT *
+            FROM {$wpdb->prefix}askiviki_wa_messages m1
+            WHERE id = (
+                SELECT id
+                FROM {$wpdb->prefix}askiviki_wa_messages m2
+                WHERE m2.phone = m1.phone
+                ORDER BY created_at DESC
+                LIMIT 1
+            )
+            ORDER BY created_at DESC
+            "
         );
         ?>
         <div class="wrap">
@@ -207,17 +215,33 @@ class AskIViki_WA_Admin {
             }
             ?>
             <h1>WhatsApp Inbox</h1>
-
+            <?php
+                $total_conversations =
+                $wpdb->get_var(
+                                "
+                    SELECT COUNT(
+                        DISTINCT phone
+                    )
+                    FROM {$wpdb->prefix}askiviki_wa_messages
+                    "
+                );
+            ?>
+            <p>
+                Total Conversations:
+                <strong>
+                    <?php echo esc_html(
+                        $total_conversations
+                    ); ?>
+                </strong>
+            </p>
             <table class="widefat striped">
 
                 <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Phone</th>
-                    <th>Message</th>
-                    <th>Type</th>
-                    <th>Date</th>
-                    <th>Reply</th>
+                    <th>Last Message</th>
+                    <th>Last Activity</th>
+                    <th>Open</th>
                 </tr>
                 </thead>
 
@@ -226,58 +250,39 @@ class AskIViki_WA_Admin {
                 <?php foreach ($messages as $message): ?>
 
                     <tr>
-                        <td><?php echo esc_html($message->id); ?></td>
+
                         <td>
-
-                            <a href="<?php echo admin_url(
-                                'admin.php?page=askiviki-conversation&phone=' .
-                                urlencode($message->phone)
-                            ); ?>">
-
-                                <?php echo esc_html(
-                                    $message->phone
-                                ); ?>
-
-                            </a>
-
+                            <?php echo esc_html(
+                                $message->phone
+                            ); ?>
                         </td>
-                        <td><?php echo esc_html($message->message); ?></td>
-                        <td><?php echo esc_html($message->message_type); ?></td>
-                        <td><?php echo esc_html($message->created_at); ?></td>
+
                         <td>
+                            <?php echo esc_html(
+                                wp_trim_words(
+                                    $message->message,
+                                    10
+                                )
+                            ); ?>
+                        </td>
 
-                            <form method="post">
+                        <td>
+                            <?php echo esc_html(
+                                $message->created_at
+                            ); ?>
+                        </td>
 
-                                <?php wp_nonce_field(
-                                    'askiviki_reply_message',
-                                    'askiviki_reply_nonce'
-                                ); ?>
-
-                                <input
-                                        type="hidden"
-                                        name="phone"
-                                        value="<?php echo esc_attr(
-                                            $message->phone
-                                        ); ?>">
-
-                                <input
-                                        type="text"
-                                        name="reply_message"
-                                        placeholder="Reply..."
-
-                                        style="width:250px;">
-
-                                <input
-                                        type="submit"
-                                        name="askiviki_send_reply"
-                                        class="button button-primary"
-                                        value="Send">
-
-                            </form>
-
+                        <td>
+                            <a
+                                class="button button-primary"
+                                href="<?php echo admin_url(
+                                    'admin.php?page=askiviki-conversation&phone=' .
+                                    urlencode($message->phone)
+                                ); ?>">
+                                Open Chat
+                            </a>
                         </td>
                     </tr>
-
                 <?php endforeach; ?>
 
                 </tbody>
@@ -328,12 +333,12 @@ class AskIViki_WA_Admin {
 
         wp_redirect(
             add_query_arg(
-                'reply_sent',
-                '1',
-                menu_page_url(
-                    'askiviki-wa-inbox',
-                    false
-                )
+                [
+                    'page'       => 'askiviki-conversation',
+                    'phone'      => $phone,
+                    'reply_sent' => '1'
+                ],
+                admin_url('admin.php')
             )
         );
         exit;
@@ -345,26 +350,60 @@ class AskIViki_WA_Admin {
         $phone = sanitize_text_field(
             $_GET['phone'] ?? ''
         );
-        error_log(
-            '[AskIViki Conversation Phone] ' .
-            $phone
-        );
 
         $table = $wpdb->prefix . 'askiviki_wa_messages';
 
-        $messages = $wpdb->get_results(
-            $wpdb->prepare(
+        $messages = [];
+
+        if (!empty($phone)) {
+
+            $messages = $wpdb->get_results(
+                $wpdb->prepare(
                     "
-            SELECT *
-            FROM {$table}
-            WHERE phone = %s
-            ORDER BY created_at ASC
-            ",
+                SELECT *
+                FROM {$table}
+                WHERE phone = %s
+                ORDER BY created_at ASC
+                ",
                     $phone
                 )
             );
+        }
         ?>
+
         <div class="wrap">
+
+            <?php if (isset($_GET['reply_sent'])) : ?>
+
+                <div class="notice notice-success is-dismissible">
+                    <p>Reply sent successfully.</p>
+                </div>
+
+            <?php endif; ?>
+
+            <p>
+                <a
+                        href="<?php echo admin_url(
+                            'admin.php?page=askiviki-wa-inbox'
+                        ); ?>"
+                        class="button">
+                    ← Back to Chats
+                </a>
+            </p>
+
+            <?php if (empty($phone)) : ?>
+
+                <h1>Conversation</h1>
+
+                <div class="notice notice-info">
+                    <p>
+                        Please open a conversation from the Chats page.
+                    </p>
+                </div>
+
+                <?php return; ?>
+
+            <?php endif; ?>
 
             <h1>
                 Conversation:
@@ -372,63 +411,105 @@ class AskIViki_WA_Admin {
             </h1>
 
             <div style="
-    max-width:800px;
-    background:#fff;
-    padding:20px;
-">
+            max-width:800px;
+            background:#fff;
+            padding:20px;
+            border:1px solid #ddd;
+        ">
 
-                <?php foreach ($messages as $message): ?>
+                <?php if (empty($messages)) : ?>
 
-                    <div style="
-                        margin:10px 0;
-                        padding:10px;
-                        border-radius:10px;
-                        background:
-                    <?php echo
-                    $message->message_type ===
-                    'admin_reply'
-                        ? '#dcf8c6'
-                        : '#f1f1f1';
-                    ?>;
-                        text-align:
-                    <?php echo
-                    $message->message_type ===
-                    'admin_reply'
-                        ? 'right'
-                        : 'left';
-                    ?>;;
-                        ">
-
-                        <strong>
-
-                            <?php echo
-                            $message->message_type ===
-                            'admin_reply'
-                                ? 'Admin'
-                                : 'Customer';
-                            ?>
-
-                        </strong>
-
-                        <br>
-
-                        <?php echo esc_html(
-                            $message->message
-                        ); ?>
-
-                        <small>
-                            <?php echo esc_html(
-                                $message->created_at
-                            ); ?>
-                        </small>
-
+                    <div class="notice notice-info">
+                        <p>
+                            No messages found for this conversation.
+                        </p>
                     </div>
 
-                <?php endforeach; ?>
+                <?php else : ?>
+
+                    <?php foreach ($messages as $message) : ?>
+
+                        <div style="
+                                margin:10px 0;
+                                padding:10px;
+                                border-radius:10px;
+                                background:
+                        <?php echo
+                        $message->message_type === 'admin_reply'
+                            ? '#dcf8c6'
+                            : '#f1f1f1';
+                        ?>;
+                                text-align:
+                        <?php echo
+                        $message->message_type === 'admin_reply'
+                            ? 'right'
+                            : 'left';
+                        ?>;
+                                ">
+
+                            <strong>
+
+                                <?php echo
+                                $message->message_type === 'admin_reply'
+                                    ? 'Admin'
+                                    : 'Customer';
+                                ?>
+
+                            </strong>
+
+                            <br>
+
+                            <?php echo esc_html(
+                                $message->message
+                            ); ?>
+
+                            <br>
+
+                            <small style="color:#666;">
+                                <?php echo esc_html(
+                                    $message->created_at
+                                ); ?>
+                            </small>
+
+                        </div>
+
+                    <?php endforeach; ?>
+
+                <?php endif; ?>
+
+                <form method="post" style="margin-top:20px;">
+
+                    <?php wp_nonce_field(
+                        'askiviki_reply_message',
+                        'askiviki_reply_nonce'
+                    ); ?>
+
+                    <input
+                            type="hidden"
+                            name="phone"
+                            value="<?php echo esc_attr($phone); ?>">
+
+                    <textarea
+                            autofocus
+                            name="reply_message"
+                            rows="4"
+                            style="width:100%;"
+                            placeholder="Type your reply..."></textarea>
+
+                    <br><br>
+
+                    <input
+                            type="submit"
+                            name="askiviki_send_reply"
+                            class="button button-primary"
+                            value="Send Reply">
+
+                </form>
 
             </div>
 
         </div>
+
         <?php
     }
 }
