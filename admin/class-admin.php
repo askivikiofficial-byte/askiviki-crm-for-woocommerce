@@ -401,12 +401,43 @@ class AskIViki_WA_Admin {
             : null;
 
         $customer_name = '';
+        $customer_email = '';
+        $billing_address = '';
+        $shipping_address = '';
+        $customer_since = '';
+        $average_order_value = 0;
 
         if ($last_order) {
 
             $customer_name =
                 $last_order
                     ->get_formatted_billing_full_name();
+            $customer_email =
+                $last_order->get_billing_email();
+
+            $billing_address =
+                $last_order->get_formatted_billing_address();
+
+            $shipping_address =
+                $last_order->get_formatted_shipping_address();
+
+            $first_order =
+                !empty($customer_orders)
+                    ? reset($customer_orders)
+                    : null;
+
+            $customer_since =
+                $first_order &&
+                $first_order->get_date_created()
+                    ? $first_order
+                    ->get_date_created()
+                    ->date('Y-m-d')
+                    : '';
+
+            $average_order_value =
+                $total_orders > 0
+                    ? $total_spend / $total_orders
+                    : 0;
         }
 
         $table = $wpdb->prefix . 'askiviki_wa_messages';
@@ -493,6 +524,13 @@ class AskIViki_WA_Admin {
                     </p>
 
                     <p>
+                        <strong>Email:</strong>
+                        <?php echo esc_html(
+                            $customer_email ?: '-'
+                        ); ?>
+                    </p>
+
+                    <p>
                         <strong>Total Orders:</strong>
                         <?php echo esc_html(
                             $total_orders
@@ -506,6 +544,50 @@ class AskIViki_WA_Admin {
                                 $total_spend,
                                 2
                             )
+                        ); ?>
+                    </p>
+
+                    <p>
+                        <strong>Customer Since:</strong>
+                        <?php echo esc_html(
+                            $customer_since ?: '-'
+                        ); ?>
+                    </p>
+
+                    <p>
+                        <strong>
+                            Average Order Value:
+                        </strong>
+
+                        ₹<?php echo esc_html(
+                            number_format(
+                                $average_order_value,
+                                2
+                            )
+                        ); ?>
+                    </p>
+
+                    <p>
+                        <strong>
+                            Billing Address:
+                        </strong>
+
+                        <br>
+
+                        <?php echo wp_kses_post(
+                            $billing_address ?: '-'
+                        ); ?>
+                    </p>
+
+                    <p>
+                        <strong>
+                            Shipping Address:
+                        </strong>
+
+                        <br>
+
+                        <?php echo wp_kses_post(
+                            $shipping_address ?: '-'
                         ); ?>
                     </p>
 
