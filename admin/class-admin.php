@@ -314,15 +314,67 @@ class AskIViki_WA_Admin {
                     FROM {$wpdb->prefix}askiviki_wa_messages
                     "
                 );
+            $vip_customers =
+                (int) $wpdb->get_var(
+                    "
+        SELECT COUNT(*)
+        FROM {$wpdb->prefix}askiviki_wa_customer_notes
+        WHERE is_vip = 1
+        "
+                );
+
+            $urgent_customers =
+                (int) $wpdb->get_var(
+                    "
+        SELECT COUNT(*)
+        FROM {$wpdb->prefix}askiviki_wa_customer_notes
+        WHERE priority_level = 'urgent'
+        "
+                );
+
+            $pinned_customers =
+                (int) $wpdb->get_var(
+                    "
+        SELECT COUNT(*)
+        FROM {$wpdb->prefix}askiviki_wa_customer_notes
+        WHERE is_pinned = 1
+        "
+                );
             ?>
-            <p>
-                Total Conversations:
-                <strong>
+            <div style="display:flex;flex-wrap:wrap;gap:15px;flex-wrap:wrap;margin:20px 0;">
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                    <h3>Total Chats</h3>
+                    <p style="font-size:28px;font-weight:bold;margin:0;">
                     <?php echo esc_html(
-                        $total_conversations
+                    $total_conversations
                     ); ?>
-                </strong>
-            </p>
+                    </p>
+                </div>
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                    <h3>⭐ VIP</h3>
+                    <p style="font-size:28px;font-weight:bold;margin:0;">
+                    <?php echo esc_html(
+                    $vip_customers
+                    ); ?>
+                    </p>
+                </div>
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                    <h3>🚨 Urgent</h3>
+                    <p style="font-size:28px;font-weight:bold;margin:0;">
+                    <?php echo esc_html(
+                    $urgent_customers
+                    ); ?>
+                    </p>
+                </div>
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                    <h3>📌 Pinned</h3>
+                    <p style="font-size:28px;font-weight:bold;margin:0;">
+                    <?php echo esc_html(
+                    $pinned_customers
+                    ); ?>
+                    </p>
+                </div>
+            </div>
 
             <form method="get">
 
