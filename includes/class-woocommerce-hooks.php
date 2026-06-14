@@ -40,19 +40,22 @@ class AskIViki_WA_WooCommerce_Hooks
         }
         $order = wc_get_order($order_id);
 
-        $template = get_option(
-            'askiviki_wa_processing_template'
-        );
+        $service = new AskIViki_WA_Service();
 
-        $message = $this->parse_template(
-            $template,
-            $order,
-            'processing'
-        );
-
-        $this->send_order_message(
-            $order,
-            $message
+        $service->send_template_message(
+            $order->get_billing_phone(),
+            get_option(
+                'askiviki_wa_processing_template_name',
+                'order_processing'
+            ),
+            [
+                'customer_name' => $order->get_billing_first_name(),
+                'order_id'      => $order->get_order_number(),
+                'order_total'   => number_format(
+                    (float)$order->get_total(),
+                    2
+                )
+            ]
         );
     }
     public function order_completed($order_id)
@@ -67,19 +70,22 @@ class AskIViki_WA_WooCommerce_Hooks
         }
         $order = wc_get_order($order_id);
 
-        $template = get_option(
-            'askiviki_wa_completed_template'
-        );
+        $service = new AskIViki_WA_Service();
 
-        $message = $this->parse_template(
-            $template,
-            $order,
-            'completed'
-        );
-
-        $this->send_order_message(
-            $order,
-            $message
+        $service->send_template_message(
+            $order->get_billing_phone(),
+            get_option(
+                'askiviki_wa_completed_template_name',
+                'order_completed'
+            ),
+            [
+                'customer_name' => $order->get_billing_first_name(),
+                'order_id'      => $order->get_order_number(),
+                'order_total'   => number_format(
+                    (float)$order->get_total(),
+                    2
+                )
+            ]
         );
     }
     public function order_cancelled($order_id)
@@ -94,19 +100,22 @@ class AskIViki_WA_WooCommerce_Hooks
         }
         $order = wc_get_order($order_id);
 
-        $template = get_option(
-            'askiviki_wa_cancelled_template'
-        );
+        $service = new AskIViki_WA_Service();
 
-        $message = $this->parse_template(
-            $template,
-            $order,
-            'cancelled'
-        );
-
-        $this->send_order_message(
-            $order,
-            $message
+        $service->send_template_message(
+            $order->get_billing_phone(),
+            get_option(
+                'askiviki_wa_cancelled_template_name',
+                'order_cancelled'
+            ),
+            [
+                'customer_name' => $order->get_billing_first_name(),
+                'order_id'      => $order->get_order_number(),
+                'order_total'   => number_format(
+                    (float)$order->get_total(),
+                    2
+                )
+            ]
         );
     }
     private function send_order_message($order, $message)
