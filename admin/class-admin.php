@@ -348,6 +348,7 @@ class AskIViki_WA_Admin {
                     <th>Last Message</th>
                     <th>Last Activity</th>
                     <th>Tags</th>
+                    <th>Priority</th>
                     <th>Open</th>
                 </tr>
                 </thead>
@@ -374,7 +375,18 @@ class AskIViki_WA_Admin {
                                 $message->phone
                             )
                         );
-
+                        $customer_note =
+                            $wpdb->get_row(
+                                $wpdb->prepare(
+                                    "
+            SELECT *
+            FROM {$wpdb->prefix}askiviki_wa_customer_notes
+            WHERE phone = %s
+            LIMIT 1
+            ",
+                                    $message->phone
+                                )
+                            );
                         ?>
                         <tr>
 
@@ -419,6 +431,17 @@ class AskIViki_WA_Admin {
                                     }
                                 }
                                 ?>
+                            </td>
+
+                            <td>
+                                <?php if ( $customer_note && $customer_note->is_vip ) {
+                                    echo '⭐ VIP';
+                                }
+                                if ( $customer_note && $customer_note->priority_level === 'urgent' ) {
+                                    echo ' 🚨 Urgent';
+                                }
+                                ?>
+
                             </td>
 
                             <td>
@@ -679,6 +702,40 @@ class AskIViki_WA_Admin {
             border:1px solid #ddd;
             margin-bottom:20px;
         ">
+                    <?php if (!empty($customer_note->is_vip)) : ?>
+                        <span style="
+                    background:#f0b90b;
+                    color:#fff;
+                    padding:5px 10px;
+                    border-radius:20px;
+                    ">
+                    ⭐ VIP
+                </span>
+                    <?php endif; ?>
+                    <?php if ( ($customer_note->priority_level ?? '') === 'urgent' ) : ?>
+                        <span style="
+                    background:red;
+                    color:#fff;
+                    padding:5px 10px;
+                    border-radius:20px;
+                    ">
+
+                    🚨 Urgent
+
+                </span>
+                    <?php endif; ?>
+                    <?php if (!empty($customer_note->is_pinned)) : ?>
+                        <span style="
+                    background:#2271b1;
+                    color:#fff;
+                    padding:5px 10px;
+                    border-radius:20px;
+                    ">
+
+                    📌 Pinned
+
+                </span>
+                    <?php endif; ?>
 
                     <h2>Customer Profile</h2>
 
@@ -917,6 +974,7 @@ class AskIViki_WA_Admin {
 ">
 
                 <h2>Internal Notes & Tags</h2>
+
                 <?php
 
                 $tags = [];
@@ -983,6 +1041,96 @@ class AskIViki_WA_Admin {
                                     $customer_note->tags ?? ''
                                 ); ?>"
                                 placeholder="VIP, Frequent Buyer">
+
+                    </p>
+
+                    <p>
+
+                        <label>
+
+                            <input
+                                type="checkbox"
+                                name="is_vip"
+                                value="1"
+
+                                <?php checked(
+                                    $customer_note->is_vip ?? 0,
+                                    1
+                                ); ?>>
+
+                            VIP Customer
+
+                        </label>
+
+                    </p>
+
+                    <p>
+
+                        <label>
+
+                            Priority Level
+
+                        </label>
+
+                        <br>
+
+                        <select
+                            name="priority_level">
+
+                            <option
+                                value="normal"
+                                <?php selected(
+                                    $customer_note->priority_level ?? '',
+                                    'normal'
+                                ); ?>>
+
+                                Normal
+
+                            </option>
+
+                            <option
+                                value="high"
+                                <?php selected(
+                                    $customer_note->priority_level ?? '',
+                                    'high'
+                                ); ?>>
+
+                                High
+
+                            </option>
+
+                            <option
+                                value="urgent"
+                                <?php selected(
+                                    $customer_note->priority_level ?? '',
+                                    'urgent'
+                                ); ?>>
+
+                                Urgent
+
+                            </option>
+
+                        </select>
+
+                    </p>
+
+                    <p>
+
+                        <label>
+
+                            <input
+                                type="checkbox"
+                                name="is_pinned"
+                                value="1"
+
+                                <?php checked(
+                                    $customer_note->is_pinned ?? 0,
+                                    1
+                                ); ?>>
+
+                            Pin Customer
+
+                        </label>
 
                     </p>
 
@@ -1157,14 +1305,21 @@ class AskIViki_WA_Admin {
         $notes = sanitize_textarea_field(
             $_POST['customer_notes']
         );
+        $is_vip = isset($_POST['is_vip']) ? 1 : 0;
+
+        $is_pinned = isset($_POST['is_pinned']) ? 1 : 0;
+
+        $priority_level =
+            sanitize_text_field(
+                $_POST['priority_level']
+            );
 
         $existing =
             $wpdb->get_var(
                 $wpdb->prepare(
                     "
                 SELECT id
-                FROM {$wpdb->prefix}
-                askiviki_wa_customer_notes
+                FROM {$wpdb->prefix}askiviki_wa_customer_notes
                 WHERE phone = %s
                 ",
                     $phone
@@ -1179,6 +1334,9 @@ class AskIViki_WA_Admin {
                 [
                     'tags' => $tags,
                     'notes' => $notes,
+                    'priority_level' => $priority_level,
+                    'is_vip' => $is_vip,
+                    'is_pinned' => $is_pinned,
                     'updated_at' =>
                         current_time('mysql')
                 ],
@@ -1196,6 +1354,9 @@ class AskIViki_WA_Admin {
                     'phone' => $phone,
                     'tags' => $tags,
                     'notes' => $notes,
+                    'priority_level' => $priority_level,
+                    'is_vip' => $is_vip,
+                    'is_pinned' => $is_pinned,
                     'created_at' =>
                         current_time('mysql')
                 ]
