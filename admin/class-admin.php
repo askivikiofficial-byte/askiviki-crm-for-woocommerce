@@ -12,6 +12,10 @@ class AskIViki_WA_Admin {
             'admin_init',
             [$this, 'handle_test_message']
         );
+        add_action(
+            'admin_init',
+            [$this, 'handle_reply']
+        );
     }
 
     public function register_menu() {
@@ -185,7 +189,15 @@ class AskIViki_WA_Admin {
         );
         ?>
         <div class="wrap">
-
+            <?php if (isset($_GET['reply_sent']))
+            {
+                ?>
+                    <div class="notice notice-success is-dismissible">
+                        <p>Reply sent successfully.</p>
+                    </div>
+            <?php
+            }
+            ?>
             <h1>WhatsApp Inbox</h1>
 
             <table class="widefat striped">
@@ -197,6 +209,7 @@ class AskIViki_WA_Admin {
                     <th>Message</th>
                     <th>Type</th>
                     <th>Date</th>
+                    <th>Reply</th>
                 </tr>
                 </thead>
 
@@ -210,6 +223,38 @@ class AskIViki_WA_Admin {
                         <td><?php echo esc_html($message->message); ?></td>
                         <td><?php echo esc_html($message->message_type); ?></td>
                         <td><?php echo esc_html($message->created_at); ?></td>
+                        <td>
+
+                            <form method="post">
+
+                                <?php wp_nonce_field(
+                                    'askiviki_reply_message',
+                                    'askiviki_reply_nonce'
+                                ); ?>
+
+                                <input
+                                        type="hidden"
+                                        name="phone"
+                                        value="<?php echo esc_attr(
+                                            $message->phone
+                                        ); ?>">
+
+                                <input
+                                        type="text"
+                                        name="reply_message"
+                                        placeholder="Reply..."
+
+                                        style="width:250px;">
+
+                                <input
+                                        type="submit"
+                                        name="askiviki_send_reply"
+                                        class="button button-primary"
+                                        value="Send">
+
+                            </form>
+
+                        </td>
                     </tr>
 
                 <?php endforeach; ?>
@@ -220,5 +265,43 @@ class AskIViki_WA_Admin {
 
         </div>
         <?php
+    }
+    public function handle_reply()
+    {
+        if (!isset($_POST['askiviki_send_reply'])) {
+            return;
+        }
+
+        if (!wp_verify_nonce($_POST['askiviki_reply_nonce'],'askiviki_reply_message')) {
+            return;
+        }
+
+        $phone = sanitize_text_field(
+            $_POST['phone']
+        );
+
+        $message = sanitize_textarea_field(
+            $_POST['reply_message']
+        );
+
+        $service =
+            new AskIViki_WA_Service();
+
+        $service->send_message(
+            $phone,
+            $message
+        );
+
+        wp_redirect(
+            add_query_arg(
+                'reply_sent',
+                '1',
+                menu_page_url(
+                    'askiviki-wa-inbox',
+                    false
+                )
+            )
+        );
+        exit;
     }
 }
