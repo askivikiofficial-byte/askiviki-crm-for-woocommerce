@@ -214,6 +214,44 @@ class AskIViki_WA_Settings {
             'askiviki-whatsapp',
             'askiviki_wa_main'
         );
+
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_processing_template_name'
+        );
+
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_completed_template_name'
+        );
+
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_cancelled_template_name'
+        );
+        add_settings_field(
+            'askiviki_wa_processing_template_name',
+            'Processing Template Name',
+            [$this, 'processing_template_name_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
+
+        add_settings_field(
+            'askiviki_wa_completed_template_name',
+            'Completed Template Name',
+            [$this, 'completed_template_name_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
+
+        add_settings_field(
+            'askiviki_wa_cancelled_template_name',
+            'Cancelled Template Name',
+            [$this, 'cancelled_template_name_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
     }
 
     public function phone_field() {
@@ -470,6 +508,44 @@ Total: ₹{order_total}"
         echo '<input
         type="text"
         name="askiviki_wa_template_language"
+        value="' . esc_attr($value) . '"
+        class="regular-text">';
+    }
+    public function processing_template_name_field()
+    {
+        $value = get_option(
+            'askiviki_wa_processing_template_name',
+            'order_processing'
+        );
+
+        echo '<input type="text"
+        name="askiviki_wa_processing_template_name"
+        value="' . esc_attr($value) . '"
+        class="regular-text">';
+    }
+
+    public function completed_template_name_field()
+    {
+        $value = get_option(
+            'askiviki_wa_completed_template_name',
+            'order_completed'
+        );
+
+        echo '<input type="text"
+        name="askiviki_wa_completed_template_name"
+        value="' . esc_attr($value) . '"
+        class="regular-text">';
+    }
+
+    public function cancelled_template_name_field()
+    {
+        $value = get_option(
+            'askiviki_wa_cancelled_template_name',
+            'order_cancelled'
+        );
+
+        echo '<input type="text"
+        name="askiviki_wa_cancelled_template_name"
         value="' . esc_attr($value) . '"
         class="regular-text">';
     }

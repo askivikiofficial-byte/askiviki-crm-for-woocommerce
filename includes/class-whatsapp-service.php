@@ -80,16 +80,38 @@ class AskIViki_WA_Service
 
         return $code >= 200 && $code < 300;
     }
-    public function send_template($phone,$template_name = 'hello_world')
+    public function send_template_message(
+        $phone,
+        $template_name,
+        $parameters = []
+    )
     {
-        if (get_option('askiviki_wa_enabled','yes') !== 'yes') {
+        if (
+            get_option(
+                'askiviki_wa_enabled',
+                'yes'
+            ) !== 'yes'
+        ) {
             return false;
         }
-        $phone_id = get_option('askiviki_wa_phone_id');
-        $token = get_option('askiviki_wa_access_token');
-        $phone = $this->format_phone($phone);
 
-        if (empty($phone_id) || empty($token) || empty($phone)) {
+        $phone_id = get_option(
+            'askiviki_wa_phone_id'
+        );
+
+        $token = get_option(
+            'askiviki_wa_access_token'
+        );
+
+        $phone = $this->format_phone(
+            $phone
+        );
+
+        if (
+            empty($phone_id) ||
+            empty($token) ||
+            empty($phone)
+        ) {
             return false;
         }
 
@@ -104,10 +126,30 @@ class AskIViki_WA_Service
                         'askiviki_wa_template_language',
                         'en_US'
                     )
+                ],
+                'components' => [
+                    [
+                        'type' => 'body',
+                        'parameters' => array_map(
+                            function ($value, $key) {
+                                return [
+                                    'type'           => 'text',
+                                    'parameter_name' => $key,
+                                    'text'           => (string) $value
+                                ];
+                            },
+                            $parameters,
+                            array_keys($parameters)
+                        )
+                    ]
                 ]
             ]
         ];
 
+        error_log(
+            '[AskIViki Template Body] ' .
+            wp_json_encode($body)
+        );
         $response = wp_remote_post(
             "https://graph.facebook.com/v25.0/{$phone_id}/messages",
             [
@@ -126,7 +168,6 @@ class AskIViki_WA_Service
         $response_body = [];
 
         if (!is_wp_error($response)) {
-
             $response_body = json_decode(
                 wp_remote_retrieve_body(
                     $response
@@ -135,16 +176,20 @@ class AskIViki_WA_Service
             );
         }
 
-        $message_id = $response_body['messages'][0]['id'] ?? '';
+        $message_id =
+            $response_body['messages'][0]['id']
+            ?? '';
 
-        $status = is_wp_error($response) ? 'failed' : 'sent';
+        $status =
+            is_wp_error($response)
+                ? 'failed'
+                : 'sent';
 
         $this->save_log(
             null,
             $phone,
             $status,
-            'Template: ' .
-            $template_name,
+            'Template: ' . $template_name,
             wp_remote_retrieve_body(
                 $response
             ),
@@ -160,8 +205,17 @@ class AskIViki_WA_Service
                 $response
             );
 
-        return $code >= 200
-            && $code < 300;
+        return $code >= 200 && $code < 300;
+    }
+    public function send_template(
+        $phone,
+        $template_name = 'hello_world'
+    )
+    {
+        return $this->send_template_message(
+            $phone,
+            $template_name
+        );
     }
     private function format_phone($phone)
     {
