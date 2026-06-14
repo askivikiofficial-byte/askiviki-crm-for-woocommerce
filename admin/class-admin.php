@@ -40,13 +40,31 @@ class AskIViki_WA_Admin {
             'askiviki-wa-logs',
             [$this, 'logs_page']
         );
+        global $wpdb;
+
+        $unread_count =
+            (int) $wpdb->get_var(
+                "
+        SELECT COUNT(
+            DISTINCT phone
+        )
+        FROM {$wpdb->prefix}askiviki_wa_messages
+        WHERE is_read = 0
+        ");
         add_submenu_page(
             'woocommerce',
             'WhatsApp Inbox',
-            'WhatsApp Inbox',
-            'manage_options',
+            'WhatsApp Inbox' .
+            (
+            $unread_count > 0
+                ? ' <span class="awaiting-mod">' .
+                $unread_count .
+                '</span>'
+                : ''
+            ),
+            'manage_woocommerce',
             'askiviki-wa-inbox',
-            [$this, 'inbox_page']
+            [ $this, 'inbox_page' ]
         );
         add_submenu_page(
             null,
@@ -382,6 +400,17 @@ class AskIViki_WA_Admin {
         WHERE is_read = 0
         "
                 );
+            $active_today =
+                (int) $wpdb->get_var(
+                    "
+        SELECT COUNT(
+            DISTINCT phone
+        )
+        FROM {$wpdb->prefix}askiviki_wa_messages
+        WHERE DATE(created_at) =
+        CURDATE()
+        "
+                );
             ?>
             <div style="display:flex;flex-wrap:wrap;gap:15px;flex-wrap:wrap;margin:20px 0;">
                 <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
@@ -421,6 +450,14 @@ class AskIViki_WA_Admin {
                     <p style="font-size:28px;font-weight:bold;margin:0;">
                         <?php echo esc_html(
                             $unread_conversations
+                        ); ?>
+                    </p>
+                </div>
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                    <h3>🟢 Active Today</h3>
+                    <p style="font-size:28px;font-weight:bold;margin:0;">
+                        <?php echo esc_html(
+                            $active_today
                         ); ?>
                     </p>
                 </div>
@@ -515,6 +552,7 @@ class AskIViki_WA_Admin {
                     <th>Phone</th>
                     <th>Last Message</th>
                     <th>Last Activity</th>
+                    <th>Status</th>
                     <th>Tags</th>
                     <th>Priority</th>
                     <th>Open</th>
@@ -567,6 +605,33 @@ class AskIViki_WA_Admin {
                                 $message->phone
                             )
                         );
+                        $last_customer_message =
+                            $wpdb->get_var(
+                                $wpdb->prepare(
+                                    "
+            SELECT message
+            FROM {$wpdb->prefix}askiviki_wa_messages
+            WHERE phone = %s
+            AND (
+                message_type = 'text'
+                OR message_type = 'incoming'
+            )
+            ORDER BY created_at DESC
+            LIMIT 1
+            ",
+                                    $message->phone
+                                )
+                            );
+                        $last_activity =
+                            strtotime(
+                                $message->created_at
+                            );
+
+                        $is_recent =
+                            (
+                                time() -
+                                $last_activity
+                            ) < 3600;
                         ?>
                         <tr>
 
@@ -580,10 +645,21 @@ class AskIViki_WA_Admin {
                                         padding:2px 8px;
                                         border-radius:20px;
                                         margin-left:5px;
+                                        font-weight:bold;
                                     ">
-                                        Unread
+                                        <?php echo esc_html($unread); ?>
                                     </span>
                                 <?php endif; ?>
+                                <small style="color:#666;display:block;">
+
+                                    <?php echo esc_html(
+                                        wp_trim_words(
+                                            $last_customer_message,
+                                            8
+                                        )
+                                    ); ?>
+
+                                </small>
                             </td>
 
                             <td>
@@ -599,6 +675,32 @@ class AskIViki_WA_Admin {
                                 <?php echo esc_html(
                                     $message->created_at
                                 ); ?>
+                            </td>
+
+                            <td>
+                                <?php if ($is_recent) : ?>
+                                    <span style="color:#008a20;font-weight:bold;">
+                                        🟢 Active
+                                    </span>
+                                <?php else : ?>
+                                    <span style="color:#777;font-weight:bold;">
+                                        ⚪ Idle
+                                    </span>
+                                <?php endif; ?>
+                                <br>
+
+                                <small style="color:#666;">
+
+                                    <?php echo esc_html(
+                                        human_time_diff(
+                                            $last_activity,
+                                            current_time('timestamp')
+                                        )
+                                    ); ?>
+
+                                    ago
+
+                                </small>
                             </td>
 
                             <td>
@@ -1409,6 +1511,12 @@ class AskIViki_WA_Admin {
                             <?php echo esc_html(
                                 $message->message
                             ); ?>
+                            <?php if ( $message->message_type === 'admin_reply' ) : ?>
+                                <br>
+                                <small style="color:#008a20;font-weight:bold;">
+                                    ✓ Sent
+                                </small>
+                            <?php endif; ?>
 
                             <br>
 
