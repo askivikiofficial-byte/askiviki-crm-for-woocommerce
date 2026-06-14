@@ -207,6 +207,40 @@ class AskIViki_WA_Admin {
             ORDER BY created_at DESC
             "
         );
+        $selected_tag =
+            sanitize_text_field(
+                $_GET['tag'] ?? ''
+            );
+        if (!empty($selected_tag)) {
+
+            $messages = $wpdb->get_results(
+                $wpdb->prepare(
+                    "
+        SELECT m1.*
+        FROM {$wpdb->prefix}askiviki_wa_messages m1
+        INNER JOIN {$wpdb->prefix}askiviki_wa_customer_notes n
+            ON n.phone = m1.phone
+        WHERE n.tags LIKE %s
+        AND m1.id = (
+            SELECT id
+            FROM {$wpdb->prefix}askiviki_wa_messages m2
+            WHERE m2.phone = m1.phone
+            ORDER BY m2.created_at DESC
+            LIMIT 1
+        )
+        ORDER BY m1.created_at DESC
+        ",
+                    '%' . $wpdb->esc_like($selected_tag) . '%'
+                )
+            );
+        }
+        $all_tags = $wpdb->get_col(
+            "
+    SELECT tags
+    FROM {$wpdb->prefix}askiviki_wa_customer_notes
+    WHERE tags <> ''
+    "
+        );
         ?>
         <div class="wrap">
             <?php if (isset($_GET['reply_sent']))
@@ -238,6 +272,74 @@ class AskIViki_WA_Admin {
                     ); ?>
                 </strong>
             </p>
+
+            <form method="get">
+
+                <input
+                        type="hidden"
+                        name="page"
+                        value="askiviki-wa-inbox">
+
+                <select name="tag">
+
+                    <option value="">
+                        All Tags
+                    </option>
+
+                    <?php
+
+                    $unique_tags = [];
+
+                    foreach ($all_tags as $tag_string) {
+
+                        $tags = array_map(
+                            'trim',
+                            explode(',', $tag_string)
+                        );
+
+                        foreach ($tags as $tag) {
+
+                            if (
+                                !empty($tag) &&
+                                !in_array(
+                                    $tag,
+                                    $unique_tags,
+                                    true
+                                )
+                            ) {
+                                $unique_tags[] = $tag;
+                            }
+                        }
+                    }
+
+                    sort($unique_tags);
+
+                    foreach ($unique_tags as $tag) :
+                        ?>
+
+                        <option
+                                value="<?php echo esc_attr($tag); ?>"
+                            <?php selected(
+                                $selected_tag,
+                                $tag
+                            ); ?>>
+
+                            <?php echo esc_html($tag); ?>
+
+                        </option>
+
+                    <?php endforeach; ?>
+
+                </select>
+
+                <input
+                        type="submit"
+                        class="button"
+                        value="Filter">
+
+            </form>
+
+            <br>
             <table class="widefat striped">
 
                 <thead>
@@ -245,49 +347,93 @@ class AskIViki_WA_Admin {
                     <th>Phone</th>
                     <th>Last Message</th>
                     <th>Last Activity</th>
+                    <th>Tags</th>
                     <th>Open</th>
                 </tr>
                 </thead>
 
                 <tbody>
-
-                <?php foreach ($messages as $message): ?>
+                <?php if (empty($messages)) : ?>
 
                     <tr>
-
-                        <td>
-                            <?php echo esc_html(
-                                $message->phone
-                            ); ?>
-                        </td>
-
-                        <td>
-                            <?php echo esc_html(
-                                wp_trim_words(
-                                    $message->message,
-                                    10
-                                )
-                            ); ?>
-                        </td>
-
-                        <td>
-                            <?php echo esc_html(
-                                $message->created_at
-                            ); ?>
-                        </td>
-
-                        <td>
-                            <a
-                                class="button button-primary"
-                                href="<?php echo admin_url(
-                                    'admin.php?page=askiviki-conversation&phone=' .
-                                    urlencode($message->phone)
-                                ); ?>">
-                                Open Chat
-                            </a>
+                        <td colspan="5">
+                            No conversations found.
                         </td>
                     </tr>
-                <?php endforeach; ?>
+                <?php else:?>
+                    <?php foreach ($messages as $message): ?>
+                        <?php
+
+                        $tags = $wpdb->get_var(
+                            $wpdb->prepare(
+                                "
+        SELECT tags
+        FROM {$wpdb->prefix}askiviki_wa_customer_notes
+        WHERE phone = %s
+        ",
+                                $message->phone
+                            )
+                        );
+
+                        ?>
+                        <tr>
+
+                            <td>
+                                <?php echo esc_html(
+                                    $message->phone
+                                ); ?>
+                            </td>
+
+                            <td>
+                                <?php echo esc_html(
+                                    wp_trim_words(
+                                        $message->message,
+                                        10
+                                    )
+                                ); ?>
+                            </td>
+
+                            <td>
+                                <?php echo esc_html(
+                                    $message->created_at
+                                ); ?>
+                            </td>
+
+                            <td>
+                                <?php
+                                if (!empty($tags)) {
+                                    foreach ( explode(',', $tags) as $tag ) {
+                                        ?>
+                                        <span style="
+                                    background:#2271b1;
+                                    color:#fff;
+                                    padding:3px 8px;
+                                    border-radius:20px;
+                                    margin-right:3px;
+                                ">
+                            <?php
+                            echo esc_html(trim($tag));
+                            ?>
+                                </span>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                            </td>
+
+                            <td>
+                                <a
+                                        class="button button-primary"
+                                        href="<?php echo admin_url(
+                                            'admin.php?page=askiviki-conversation&phone=' .
+                                            urlencode($message->phone)
+                                        ); ?>">
+                                    Open Chat
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
 
                 </tbody>
 
@@ -449,8 +595,7 @@ class AskIViki_WA_Admin {
                 $wpdb->prepare(
                     "
             SELECT *
-            FROM {$wpdb->prefix}
-            askiviki_wa_customer_notes
+            FROM {$wpdb->prefix}askiviki_wa_customer_notes
             WHERE phone = %s
             LIMIT 1
             ",
@@ -772,6 +917,41 @@ class AskIViki_WA_Admin {
 ">
 
                 <h2>Internal Notes & Tags</h2>
+                <?php
+
+                $tags = [];
+
+                if ( !empty($customer_note->tags)) {
+                    $tags = array_map('trim',explode(',',$customer_note->tags));
+                }
+
+                ?>
+
+                <?php if (!empty($tags)) : ?>
+
+                    <p>
+
+                        <?php foreach ($tags as $tag) : ?>
+
+                            <span style="
+                display:inline-block;
+                background:#2271b1;
+                color:#fff;
+                padding:4px 10px;
+                border-radius:20px;
+                margin-right:5px;
+                margin-bottom:5px;
+            ">
+
+                🏷 <?php echo esc_html($tag); ?>
+
+            </span>
+
+                        <?php endforeach; ?>
+
+                    </p>
+
+                <?php endif; ?>
 
                 <form method="post">
 
