@@ -78,18 +78,11 @@ class AskIViki_WA_Admin {
     }
     public function handle_test_message()
     {
-        if (
-        !isset($_POST['askiviki_send_test'])
-        ) {
+        if (!isset($_POST['askiviki_send_test'])) {
             return;
         }
 
-        if (
-        !wp_verify_nonce(
-            $_POST['askiviki_test_nonce'],
-            'askiviki_send_test'
-        )
-        ) {
+        if (!wp_verify_nonce($_POST['askiviki_test_nonce'],'askiviki_send_test')) {
             return;
         }
 
@@ -99,10 +92,23 @@ class AskIViki_WA_Admin {
 
         $service = new AskIViki_WA_Service();
 
-        $service->send_message(
-            $phone,
-            'Hello from Ask I Viki WooCommerce WhatsApp'
-        );
+        if (get_option('askiviki_wa_use_template','no') === 'yes') {
+
+            $service->send_template(
+                $phone,
+                get_option(
+                    'askiviki_wa_template_name',
+                    'hello_world'
+                )
+            );
+
+        } else {
+
+            $service->send_message(
+                $phone,
+                'Hello from Ask I Viki WooCommerce WhatsApp'
+            );
+        }
 
         add_settings_error(
             'askiviki_wa',

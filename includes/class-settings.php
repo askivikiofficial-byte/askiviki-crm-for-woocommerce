@@ -177,6 +177,43 @@ class AskIViki_WA_Settings {
             'askiviki-whatsapp',
             'askiviki_wa_main'
         );
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_use_template'
+        );
+
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_template_name'
+        );
+
+        register_setting(
+            'askiviki_wa_group',
+            'askiviki_wa_template_language'
+        );
+        add_settings_field(
+            'askiviki_wa_use_template',
+            'Use Template Messages',
+            [$this, 'use_template_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
+
+        add_settings_field(
+            'askiviki_wa_template_name',
+            'Template Name',
+            [$this, 'template_name_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
+
+        add_settings_field(
+            'askiviki_wa_template_language',
+            'Template Language',
+            [$this, 'template_language_field'],
+            'askiviki-whatsapp',
+            'askiviki_wa_main'
+        );
     }
 
     public function phone_field() {
@@ -391,6 +428,48 @@ Total: ₹{order_total}"
         echo '<input
         type="text"
         name="askiviki_wa_verify_token"
+        value="' . esc_attr($value) . '"
+        class="regular-text">';
+    }
+    public function use_template_field()
+    {
+        $value = get_option(
+            'askiviki_wa_use_template',
+            'no'
+        );
+        ?>
+        <input
+                type="checkbox"
+                name="askiviki_wa_use_template"
+                value="yes"
+            <?php checked($value, 'yes'); ?>
+        >
+        Enable Template Messages
+        <?php
+    }
+    public function template_name_field()
+    {
+        $value = get_option(
+            'askiviki_wa_template_name',
+            'hello_world'
+        );
+
+        echo '<input
+        type="text"
+        name="askiviki_wa_template_name"
+        value="' . esc_attr($value) . '"
+        class="regular-text">';
+    }
+    public function template_language_field()
+    {
+        $value = get_option(
+            'askiviki_wa_template_language',
+            'en_US'
+        );
+
+        echo '<input
+        type="text"
+        name="askiviki_wa_template_language"
         value="' . esc_attr($value) . '"
         class="regular-text">';
     }

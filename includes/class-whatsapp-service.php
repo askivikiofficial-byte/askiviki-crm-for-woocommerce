@@ -80,6 +80,89 @@ class AskIViki_WA_Service
 
         return $code >= 200 && $code < 300;
     }
+    public function send_template($phone,$template_name = 'hello_world')
+    {
+        if (get_option('askiviki_wa_enabled','yes') !== 'yes') {
+            return false;
+        }
+        $phone_id = get_option('askiviki_wa_phone_id');
+        $token = get_option('askiviki_wa_access_token');
+        $phone = $this->format_phone($phone);
+
+        if (empty($phone_id) || empty($token) || empty($phone)) {
+            return false;
+        }
+
+        $body = [
+            'messaging_product' => 'whatsapp',
+            'to' => $phone,
+            'type' => 'template',
+            'template' => [
+                'name' => $template_name,
+                'language' => [
+                    'code' => get_option(
+                        'askiviki_wa_template_language',
+                        'en_US'
+                    )
+                ]
+            ]
+        ];
+
+        $response = wp_remote_post(
+            "https://graph.facebook.com/v25.0/{$phone_id}/messages",
+            [
+                'headers' => [
+                    'Authorization' =>
+                        'Bearer ' . $token,
+                    'Content-Type' =>
+                        'application/json'
+                ],
+                'body' =>
+                    wp_json_encode($body),
+                'timeout' => 30
+            ]
+        );
+
+        $response_body = [];
+
+        if (!is_wp_error($response)) {
+
+            $response_body = json_decode(
+                wp_remote_retrieve_body(
+                    $response
+                ),
+                true
+            );
+        }
+
+        $message_id = $response_body['messages'][0]['id'] ?? '';
+
+        $status = is_wp_error($response) ? 'failed' : 'sent';
+
+        $this->save_log(
+            null,
+            $phone,
+            $status,
+            'Template: ' .
+            $template_name,
+            wp_remote_retrieve_body(
+                $response
+            ),
+            $message_id
+        );
+
+        if (is_wp_error($response)) {
+            return false;
+        }
+
+        $code =
+            wp_remote_retrieve_response_code(
+                $response
+            );
+
+        return $code >= 200
+            && $code < 300;
+    }
     private function format_phone($phone)
     {
         $phone = preg_replace('/[^0-9]/', '', $phone);
