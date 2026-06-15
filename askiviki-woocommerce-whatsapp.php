@@ -12,7 +12,7 @@
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * WC requires at least: 8.0
- * WC tested up to: 10.0
+ * WC tested up to: 11.0
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -22,6 +22,24 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+add_action(
+    'before_woocommerce_init',
+    function () {
+
+        if (
+        class_exists(
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::class
+        )
+        ) {
+
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+                'custom_order_tables',
+                __FILE__,
+                true
+            );
+        }
+    }
+);
 require_once plugin_dir_path(__FILE__) . 'includes/class-loader.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-activator.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-deactivator.php';
