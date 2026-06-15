@@ -240,6 +240,10 @@ class AskIViki_WA_Admin {
             sanitize_text_field(
                 $_GET['tag'] ?? ''
             );
+        $search =
+            sanitize_text_field(
+                $_GET['search'] ?? ''
+            );
         if (!empty($selected_tag)) {
 
             $messages = $wpdb->get_results(
@@ -291,6 +295,35 @@ class AskIViki_WA_Admin {
                         $unread
                     );
                     return $unread > 0;
+                }
+            );
+        }
+        if (!empty($search)){
+            $messages = array_filter( $messages, function ($message) use ( $search ) {
+                    if ( stripos( $message->phone, $search ) !== false ) {
+                        return true;
+                    }
+                    $orders = wc_get_orders([
+                                    'billing_phone' =>
+                                        $message->phone,
+                                    'limit' => 1
+                                ]);
+                    if ( !empty($orders) ) {
+                        $customer_name = $orders[0]->get_formatted_billing_full_name();
+                        return stripos( $customer_name, $search ) !== false;
+                    }
+                global $wpdb;
+
+                $count =$wpdb->get_var($wpdb->prepare(
+                            "SELECT COUNT(*) FROM {$wpdb->prefix}askiviki_wa_messages WHERE phone = %s AND message LIKE %s",
+                            $message->phone,
+                            '%' . $search . '%'
+                        )
+                    );
+                if ($count > 0) {
+                    return true;
+                }
+                    return false;
                 }
             );
         }
@@ -473,7 +506,11 @@ class AskIViki_WA_Admin {
                     </p>
                 </div>
             </div>
-
+            <form method="get" style="margin-bottom:20px;">
+                <input type="hidden" name="page" value="askiviki-wa-inbox">
+                <input type="text" name="search" placeholder="Search phone, customer name..." value="<?php echo esc_attr( $_GET['search'] ?? '' ); ?>" style="width:300px;">
+                <input type="submit" class="button" value="Search">
+            </form>
             <form method="get">
 
                 <input
@@ -556,6 +593,7 @@ class AskIViki_WA_Admin {
             </form>
 
             <br>
+            <p> Found <strong> <?php echo esc_html( count($messages) ); ?> </strong> conversation(s). </p>
             <table class="widefat striped">
 
                 <thead>
