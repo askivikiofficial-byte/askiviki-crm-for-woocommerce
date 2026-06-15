@@ -127,6 +127,11 @@ class AskIViki_WA_Admin {
             </form>
 
         </div>
+        <hr>
+        <p style="color:#777;">
+            Ask I Viki CRM
+            Version 1.0.0 Beta
+        </p>
         <?php
     }
     public function handle_test_message()
@@ -396,7 +401,14 @@ class AskIViki_WA_Admin {
             <?php
             }
             ?>
-            <h1>WhatsApp Inbox</h1>
+            <div style="background:#fff;padding:20px;border:1px solid #ddd;margin-bottom:20px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);">
+                <h1 style="margin:0;">
+                    Ask I Viki CRM
+                </h1>
+                <p style="color:#666;margin-top:10px;">
+                    WhatsApp Customer Support Center
+                </p>
+            </div>
             <?php
                 $total_conversations =
                 $wpdb->get_var(
@@ -457,7 +469,7 @@ class AskIViki_WA_Admin {
                 );
             ?>
             <div style="display:flex;flex-wrap:wrap;gap:15px;flex-wrap:wrap;margin:20px 0;">
-                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);">
                     <h3>Total Chats</h3>
                     <p style="font-size:28px;font-weight:bold;margin:0;">
                     <?php echo esc_html(
@@ -465,7 +477,7 @@ class AskIViki_WA_Admin {
                     ); ?>
                     </p>
                 </div>
-                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);">
                     <h3>⭐ VIP</h3>
                     <p style="font-size:28px;font-weight:bold;margin:0;">
                     <?php echo esc_html(
@@ -473,7 +485,7 @@ class AskIViki_WA_Admin {
                     ); ?>
                     </p>
                 </div>
-                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);">
                     <h3>🚨 Urgent</h3>
                     <p style="font-size:28px;font-weight:bold;margin:0;">
                     <?php echo esc_html(
@@ -481,7 +493,7 @@ class AskIViki_WA_Admin {
                     ); ?>
                     </p>
                 </div>
-                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);">
                     <h3>📌 Pinned</h3>
                     <p style="font-size:28px;font-weight:bold;margin:0;">
                     <?php echo esc_html(
@@ -489,7 +501,7 @@ class AskIViki_WA_Admin {
                     ); ?>
                     </p>
                 </div>
-                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);">
                     <h3>🔴 Unread</h3>
                     <p style="font-size:28px;font-weight:bold;margin:0;">
                         <?php echo esc_html(
@@ -497,7 +509,7 @@ class AskIViki_WA_Admin {
                         ); ?>
                     </p>
                 </div>
-                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;">
+                <div style="background:#fff;border:1px solid #ddd;padding:20px;min-width:180px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);">
                     <h3>🟢 Active Today</h3>
                     <p style="font-size:28px;font-weight:bold;margin:0;">
                         <?php echo esc_html(
@@ -1047,10 +1059,31 @@ class AskIViki_WA_Admin {
 
             <?php endif; ?>
 
-            <h1>
-                Conversation:
-                <?php echo esc_html($phone); ?>
-            </h1>
+            <div style="background:#fff;border:1px solid #ddd;padding:20px;margin-bottom:20px;border-radius:8px;">
+                <h1 style="margin:0;">
+                    <?php echo esc_html($customer_name ?: 'Unknown Customer'); ?>
+                </h1>
+                <p style="margin:5px 0 15px;color:#666;">
+                    <?php echo esc_html($phone); ?>
+                </p>
+                <div style="margin-top:10px;">
+                    <?php if (!empty($customer_note->is_vip)) : ?>
+                        <span style="background:#fff3cd;color:#856404;padding:4px 10px;border-radius:20px;margin-right:5px;font-weight:bold;">
+                            ⭐ VIP
+                        </span>
+                    <?php endif; ?>
+                    <?php if (!empty($customer_note->is_pinned)) : ?>
+                        <span style="background:#d1ecf1;color:#0c5460;padding:4px 10px;border-radius:20px;margin-right:5px;font-weight:bold;">
+                            📌 Pinned
+                        </span>
+                    <?php endif; ?>
+                    <?php if (!empty($customer_note->priority) && $customer_note->priority === 'urgent') : ?>
+                        <span style="background:#f8d7da;color:#721c24;padding:4px 10px;border-radius:20px;font-weight:bold;">
+                            🚨 Urgent
+                        </span>
+                    <?php endif; ?>
+                </div>
+            </div>
             <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:20px;">
                 <div style="
             flex:1 1 350px;
@@ -1060,19 +1093,6 @@ class AskIViki_WA_Admin {
             border:1px solid #ddd;
             margin-bottom:20px;
         ">
-                    <?php
-                    if ( $customer_note && $customer_note->is_pinned ) {
-                        echo '📌 Pinned';
-                    } elseif ( $customer_note && $customer_note->priority_level === 'urgent' ) {
-                        echo '🚨 Urgent';
-                    } elseif ( $customer_note && $customer_note->priority_level === 'high' ) {
-                        echo '🔥 High';
-                    } elseif ( $customer_note && $customer_note->is_vip ) {
-                        echo '⭐ VIP';
-                    } else {
-                        echo 'Normal';
-                    }
-                    ?>
 
                     <h2>Customer Profile</h2>
 
@@ -1529,19 +1549,21 @@ class AskIViki_WA_Admin {
 
                         <div style="
                                 margin:10px 0;
-                                padding:10px;
-                                border-radius:10px;
+                                padding:12px;
+                                border-radius:12px;
+                                max-width:70%;
+                                word-wrap:break-word;
                                 background:
                         <?php echo
                         $message->message_type === 'admin_reply'
                             ? '#dcf8c6'
                             : '#f1f1f1';
                         ?>;
-                                text-align:
+                                margin-left:
                         <?php echo
                         $message->message_type === 'admin_reply'
-                            ? 'right'
-                            : 'left';
+                            ? 'auto'
+                            : '0';
                         ?>;
                                 ">
 
@@ -1580,61 +1602,60 @@ class AskIViki_WA_Admin {
                     <?php endforeach; ?>
 
                 <?php endif; ?>
+                <div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #ddd;z-index:10;box-shadow:0 -2px 8px rgba(0,0,0,.08);">
+                    <form method="post" style="margin-top:20px;">
 
-                <form method="post" style="margin-top:20px;">
+                        <?php wp_nonce_field(
+                            'askiviki_reply_message',
+                            'askiviki_reply_nonce'
+                        );
+                        $quick_replies = $wpdb->get_results( " SELECT * FROM {$wpdb->prefix}askiviki_wa_quick_replies ORDER BY title ASC ");
+                        ?>
+                        <?php if (!empty($quick_replies)) : ?>
 
-                    <?php wp_nonce_field(
-                        'askiviki_reply_message',
-                        'askiviki_reply_nonce'
-                    );
-                    $quick_replies = $wpdb->get_results( " SELECT * FROM {$wpdb->prefix}askiviki_wa_quick_replies ORDER BY title ASC ");
-                    ?>
-                    <?php if (!empty($quick_replies)) : ?>
+                            <div style="margin-bottom:15px;">
+                                <h3 style="margin-top:0;margin-bottom:10px;">
+                                    ⚡ Quick Replies
+                                </h3>
+                                <?php foreach ( $quick_replies as $reply ) : ?>
+                                    <button type="button" class="button quick-reply-btn" data-message="<?php echo esc_attr($reply->message ); ?>">
+                                        <?php echo esc_html( $reply->title ); ?>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
 
-                        <div style="margin-bottom:15px;">
-                            <strong>
-                                Quick Replies:
-                            </strong>
-                            <br><br>
-                            <?php foreach ( $quick_replies as $reply ) : ?>
-                                <button type="button" class="button quick-reply-btn" data-message="<?php echo esc_attr($reply->message ); ?>">
-                                    <?php echo esc_html( $reply->title ); ?>
-                                </button>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+                        <input
+                                type="hidden"
+                                name="phone"
+                                value="<?php echo esc_attr($phone); ?>">
 
-                    <input
-                            type="hidden"
-                            name="phone"
-                            value="<?php echo esc_attr($phone); ?>">
+                        <textarea
+                                autofocus
+                                name="reply_message"
+                                rows="4"
+                                style="width:100%;"
+                                placeholder="Type your reply..."></textarea>
 
-                    <textarea
-                            autofocus
-                            name="reply_message"
-                            rows="4"
-                            style="width:100%;"
-                            placeholder="Type your reply..."></textarea>
+                        <br><br>
 
-                    <br><br>
+                        <input
+                                type="submit"
+                                name="askiviki_send_reply"
+                                class="button button-primary"
+                                value="Send Reply">
 
-                    <input
-                            type="submit"
-                            name="askiviki_send_reply"
-                            class="button button-primary"
-                            value="Send Reply">
+                    </form>
+                    <script>
+                        document.querySelectorAll('.quick-reply-btn').forEach(function(btn){
+                                    btn.addEventListener('click',function(){
+                                            document.querySelector('textarea[name="reply_message"]').value += this.dataset.message;
+                                        }
+                                    );
+                            });
 
-                </form>
-                <script>
-                    document.querySelectorAll('.quick-reply-btn').forEach(function(btn){
-                                btn.addEventListener('click',function(){
-                                        document.querySelector('textarea[name="reply_message"]').value += this.dataset.message;
-                                    }
-                                );
-                        });
-
-                </script>
-
+                    </script>
+                </div>
             </div>
 
         </div>
