@@ -39,9 +39,23 @@ class AskIViki_WA_Webhook
 
     public function verify($request)
     {
-        $mode = $_GET['hub_mode'] ?? '';
-        $token = $_GET['hub_verify_token'] ?? '';
-        $challenge = $_GET['hub_challenge'] ?? '';
+        $mode = sanitize_text_field(
+            wp_unslash(
+                $_GET['hub_mode'] ?? ''
+            )
+        );
+
+        $token = sanitize_text_field(
+            wp_unslash(
+                $_GET['hub_verify_token'] ?? ''
+            )
+        );
+
+        $challenge = sanitize_text_field(
+            wp_unslash(
+                $_GET['hub_challenge'] ?? ''
+            )
+        );
 
         if (
             $mode === 'subscribe' &&

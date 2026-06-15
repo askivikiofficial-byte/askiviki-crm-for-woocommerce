@@ -90,6 +90,9 @@ class AskIViki_WA_Admin {
 
     public function settings_page()
     {
+        if (!current_user_can('manage_woocommerce')) {
+            return;
+        }
         ?>
         <div class="wrap">
 
@@ -140,7 +143,7 @@ class AskIViki_WA_Admin {
             return;
         }
 
-        if (!wp_verify_nonce($_POST['askiviki_test_nonce'],'askiviki_send_test')) {
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['askiviki_test_nonce'])),'askiviki_send_test')) {
             return;
         }
 
@@ -225,6 +228,9 @@ class AskIViki_WA_Admin {
     }
     public function inbox_page()
     {
+        if (!current_user_can('manage_woocommerce')) {
+            return;
+        }
         global $wpdb;
 
         $messages = $wpdb->get_results(
@@ -520,7 +526,7 @@ class AskIViki_WA_Admin {
             </div>
             <form method="get" style="margin-bottom:20px;">
                 <input type="hidden" name="page" value="askiviki-wa-inbox">
-                <input type="text" name="search" placeholder="Search phone, customer name..." value="<?php echo esc_attr( $_GET['search'] ?? '' ); ?>" style="width:300px;">
+                <input type="text" name="search" placeholder="Search phone, customer name..." value="<?php echo esc_attr(sanitize_text_field(wp_unslash($_GET['search'] ?? ''))); ?>" style="width:300px;">
                 <input type="submit" class="button" value="Search">
             </form>
             <form method="get">
@@ -788,10 +794,16 @@ class AskIViki_WA_Admin {
 
                             <td>
                                 <?php if ( $customer_note && $customer_note->is_vip ) {
-                                    echo '⭐ VIP';
+                                    echo esc_html__(
+                                        '⭐ VIP',
+                                        'askiviki-woocommerce-whatsapp'
+                                    );
                                 }
                                 if ( $customer_note && $customer_note->priority_level === 'urgent' ) {
-                                    echo ' 🚨 Urgent';
+                                    echo esc_html__(
+                                        '🚨 Urgent',
+                                        'askiviki-woocommerce-whatsapp'
+                                    );
                                 }
                                 ?>
 
@@ -800,10 +812,10 @@ class AskIViki_WA_Admin {
                             <td>
                                 <a
                                         class="button button-primary"
-                                        href="<?php echo admin_url(
+                                        href="<?php echo esc_url(admin_url(
                                             'admin.php?page=askiviki-conversation&phone=' .
                                             urlencode($message->phone)
-                                        ); ?>">
+                                        )); ?>">
                                     Open Chat
                                 </a>
                             </td>
@@ -820,20 +832,27 @@ class AskIViki_WA_Admin {
     }
     public function handle_reply()
     {
+        if (!current_user_can('manage_woocommerce')) {
+            return;
+        }
         if (!isset($_POST['askiviki_send_reply'])) {
             return;
         }
 
-        if (!wp_verify_nonce($_POST['askiviki_reply_nonce'],'askiviki_reply_message')) {
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['askiviki_reply_nonce'])),'askiviki_reply_message')) {
             return;
         }
 
         $phone = sanitize_text_field(
-            $_POST['phone']
+            wp_unslash(
+                $_POST['phone']
+            )
         );
 
         $message = sanitize_textarea_field(
-            $_POST['reply_message']
+            wp_unslash(
+                $_POST['reply_message']
+            )
         );
 
         $service =
@@ -872,13 +891,16 @@ class AskIViki_WA_Admin {
                     'phone'      => $phone,
                     'reply_sent' => '1'
                 ],
-                admin_url('admin.php')
+                esc_url(admin_url('admin.php'))
             )
         );
         exit;
     }
     public function conversation_page()
     {
+        if (!current_user_can('manage_woocommerce')) {
+            return;
+        }
         global $wpdb;
 
         $phone = sanitize_text_field(
@@ -1037,9 +1059,9 @@ class AskIViki_WA_Admin {
 
             <p>
                 <a
-                        href="<?php echo admin_url(
+                        href="<?php echo esc_url(admin_url(
                             'admin.php?page=askiviki-wa-inbox'
-                        ); ?>"
+                        )); ?>"
                         class="button">
                     ← Back to Chats
                 </a>
@@ -1197,11 +1219,11 @@ class AskIViki_WA_Admin {
                         <p>
                             <a
                                 class="button"
-                                href="<?php echo admin_url(
+                                href="<?php echo esc_url(admin_url(
                                     'post.php?post=' .
                                     $last_order->get_id() .
                                     '&action=edit'
-                                ); ?>">
+                                )); ?>">
                                 View Order
                             </a>
                         </p>
@@ -1297,11 +1319,11 @@ class AskIViki_WA_Admin {
 
                                             <a
                                                 class="button"
-                                                href="<?php echo admin_url(
+                                                href="<?php echo esc_url(admin_url(
                                                     'post.php?post=' .
                                                     $order->get_id() .
                                                     '&action=edit'
-                                                ); ?>">
+                                                )); ?>">
 
                                                 View
 
@@ -1664,6 +1686,9 @@ class AskIViki_WA_Admin {
     }
     public function save_customer_note()
     {
+        if (!current_user_can('manage_woocommerce')) {
+            return;
+        }
         if (
         !isset(
             $_POST['askiviki_save_note']
@@ -1684,15 +1709,21 @@ class AskIViki_WA_Admin {
         global $wpdb;
 
         $phone = sanitize_text_field(
-            $_POST['customer_phone']
+            wp_unslash(
+                $_POST['customer_phone']
+            )
         );
 
         $tags = sanitize_text_field(
-            $_POST['customer_tags']
+            wp_unslash(
+                $_POST['customer_tags']
+            )
         );
 
         $notes = sanitize_textarea_field(
-            $_POST['customer_notes']
+            wp_unslash(
+                $_POST['customer_notes']
+            )
         );
         $is_vip = isset($_POST['is_vip']) ? 1 : 0;
 
@@ -1700,7 +1731,9 @@ class AskIViki_WA_Admin {
 
         $priority_level =
             sanitize_text_field(
-                $_POST['priority_level']
+                wp_unslash(
+                    $_POST['priority_level']
+                )
             );
 
         $existing =
@@ -1758,9 +1791,9 @@ class AskIViki_WA_Admin {
                     'phone' => $phone,
                     'note_saved' => 1
                 ],
-                admin_url(
+                esc_url(admin_url(
                     'admin.php'
-                )
+                ))
             )
         );
 
@@ -1768,23 +1801,43 @@ class AskIViki_WA_Admin {
     }
     public function quick_replies_page()
     {
+        if (!current_user_can('manage_woocommerce')) {
+            return;
+        }
     global $wpdb;
 
     $table = $wpdb->prefix .'askiviki_wa_quick_replies';
 
     if ( isset($_POST['save_quick_reply'])) {
-
+        if (
+            !isset($_POST['askiviki_quick_reply_nonce'])
+            ||
+            !wp_verify_nonce(
+                sanitize_text_field(
+                    wp_unslash(
+                        $_POST['askiviki_quick_reply_nonce']
+                    )
+                ),
+                'askiviki_quick_reply'
+            )
+        ) {
+            return;
+        }
         $wpdb->insert(
             $table,
             [
                 'title' =>
                     sanitize_text_field(
-                        $_POST['title']
+                        wp_unslash(
+                            $_POST['title']
+                        )
                     ),
 
                 'message' =>
                     sanitize_textarea_field(
-                        $_POST['message']
+                        wp_unslash(
+                            $_POST['message']
+                        )
                     ),
 
                 'created_at' =>
@@ -1798,12 +1851,18 @@ class AskIViki_WA_Admin {
                     )
             ]
         );
-        echo '
-            <div class="notice notice-success is-dismissible">
-                <p>
-                    Quick reply saved successfully.
-                </p>
-            </div>';
+        ?>
+        <div class="notice notice-success is-dismissible">
+            <p>
+                <?php
+                echo esc_html__(
+                    'Quick reply saved successfully.',
+                    'askiviki-woocommerce-whatsapp'
+                );
+                ?>
+            </p>
+        </div>
+        <?php
     }
     ?>
     <div class="wrap">
@@ -1811,6 +1870,12 @@ class AskIViki_WA_Admin {
             Quick Replies
         </h1>
         <form method="post">
+            <?php
+                wp_nonce_field(
+                    'askiviki_quick_reply',
+                    'askiviki_quick_reply_nonce'
+                );
+            ?>
             <table class="form-table">
                 <tr>
                     <th>
