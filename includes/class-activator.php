@@ -73,6 +73,26 @@ class AskIViki_WA_Activator {
         
         ) {$charset_collate};
         ";
+        $table_quick_replies =
+            $wpdb->prefix .'askiviki_wa_quick_replies';
+
+        $sql .= "
+        CREATE TABLE {$table_quick_replies} (
+        
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        
+            title VARCHAR(255) NOT NULL,
+        
+            message LONGTEXT NOT NULL,
+        
+            created_at DATETIME NOT NULL,
+            
+            updated_at DATETIME NULL,
+            
+            PRIMARY KEY (id)
+        
+        ) {$charset_collate};
+        ";
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
