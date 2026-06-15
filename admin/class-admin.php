@@ -67,6 +67,17 @@ class AskIViki_WA_Admin {
             [ $this, 'inbox_page' ]
         );
         add_submenu_page(
+            'woocommerce',
+            'Quick Replies',
+            'Quick Replies',
+            'manage_woocommerce',
+            'askiviki-quick-replies',
+            [
+                $this,
+                'quick_replies_page'
+            ]
+        );
+        add_submenu_page(
             null,
             'Conversation',
             'Conversation',
@@ -1537,7 +1548,23 @@ class AskIViki_WA_Admin {
                     <?php wp_nonce_field(
                         'askiviki_reply_message',
                         'askiviki_reply_nonce'
-                    ); ?>
+                    );
+                    $quick_replies = $wpdb->get_results( " SELECT * FROM {$wpdb->prefix}askiviki_wa_quick_replies ORDER BY title ASC ");
+                    ?>
+                    <?php if (!empty($quick_replies)) : ?>
+
+                        <div style="margin-bottom:15px;">
+                            <strong>
+                                Quick Replies:
+                            </strong>
+                            <br><br>
+                            <?php foreach ( $quick_replies as $reply ) : ?>
+                                <button type="button" class="button quick-reply-btn" data-message="<?php echo esc_attr($reply->message ); ?>">
+                                    <?php echo esc_html( $reply->title ); ?>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
 
                     <input
                             type="hidden"
@@ -1560,6 +1587,15 @@ class AskIViki_WA_Admin {
                             value="Send Reply">
 
                 </form>
+                <script>
+                    document.querySelectorAll('.quick-reply-btn').forEach(function(btn){
+                                btn.addEventListener('click',function(){
+                                        document.querySelector('textarea[name="reply_message"]').value += this.dataset.message;
+                                    }
+                                );
+                        });
+
+                </script>
 
             </div>
 
@@ -1671,4 +1707,97 @@ class AskIViki_WA_Admin {
 
         exit;
     }
+    public function quick_replies_page()
+    {
+    global $wpdb;
+
+    $table = $wpdb->prefix .'askiviki_wa_quick_replies';
+
+    if ( isset($_POST['save_quick_reply'])) {
+
+        $wpdb->insert(
+            $table,
+            [
+                'title' =>
+                    sanitize_text_field(
+                        $_POST['title']
+                    ),
+
+                'message' =>
+                    sanitize_textarea_field(
+                        $_POST['message']
+                    ),
+
+                'created_at' =>
+                    current_time(
+                        'mysql'
+                    ),
+
+                'updated_at' =>
+                    current_time(
+                        'mysql'
+                    )
+            ]
+        );
+        echo '
+            <div class="notice notice-success is-dismissible">
+                <p>
+                    Quick reply saved successfully.
+                </p>
+            </div>';
+    }
+    ?>
+    <div class="wrap">
+        <h1>
+            Quick Replies
+        </h1>
+        <form method="post">
+            <table class="form-table">
+                <tr>
+                    <th>
+                        Title
+                    </th>
+                    <td>
+                        <input type="text" name="title" class="regular-text" required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        Message
+                    </th>
+                    <td>
+                        <textarea name="message" rows="6" cols="60" required></textarea>
+                    </td>
+                </tr>
+            </table>
+            <p>
+                <input type="submit" name="save_quick_reply" class="button button-primary" value="Save Reply">
+            </p>
+        </form>
+        <?php
+        $replies = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY id DESC" );
+        ?>
+        <h2> Saved Replies </h2>
+        <table class="widefat striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Message</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ( $replies as $reply ) : ?>
+                <tr>
+                    <td> <?php echo esc_html( $reply->id ); ?> </td>
+                    <td> <?php echo esc_html( $reply->title ); ?> </td>
+                    <td> <?php echo esc_html( $reply->message ); ?> </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+        <?php
+    }
+        
 }
