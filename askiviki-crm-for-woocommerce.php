@@ -1,22 +1,23 @@
 <?php
 /**
 
- * Plugin Name: Ask I Viki WooCommerce WhatsApp
+ * Plugin Name: Ask I Viki CRM for WooCommerce
  * Plugin URI: https://askiviki.simpletechgroups.com/
- * Description: WhatsApp CRM, customer support inbox, quick replies, customer management, and WooCommerce WhatsApp notifications powered by the Meta WhatsApp Cloud API.
+ * Description: Customer messaging, CRM, support inbox, quick replies and WooCommerce notifications powered by the Meta Cloud API.
  * Version: 1.0.0
  * Author: Ask I Viki
  * Author URI: https://askiviki.simpletechgroups.com/
- * Text Domain: askiviki-woocommerce-whatsapp
+ * Text Domain: askiviki-crm-for-woocommerce
  * Domain Path: /languages
  * Requires at least: 6.0
+ * Tested up to: 7.0
  * Requires PHP: 7.4
  * WC requires at least: 8.0
  * WC tested up to: 11.0
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package AskIVikiWooCommerceWhatsApp
+ * @package AskIVikiCRMForWooCommerce
  */
 
 if (!defined('ABSPATH')) {

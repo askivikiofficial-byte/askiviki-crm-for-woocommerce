@@ -16,7 +16,10 @@ class AskIViki_WA_Settings {
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_phone'
+            'askiviki_wa_phone',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         add_settings_section(
@@ -36,7 +39,10 @@ class AskIViki_WA_Settings {
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_test_number'
+            'askiviki_wa_test_number',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         add_settings_field(
@@ -48,12 +54,18 @@ class AskIViki_WA_Settings {
         );
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_phone_id'
+            'askiviki_wa_phone_id',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_access_token'
+            'askiviki_wa_access_token',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
         add_settings_field(
             'askiviki_wa_phone_id',
@@ -72,21 +84,33 @@ class AskIViki_WA_Settings {
         );
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_enabled'
+            'askiviki_wa_enabled',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_notify_processing'
+            'askiviki_wa_notify_processing',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_notify_completed'
+            'askiviki_wa_notify_completed',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_notify_cancelled'
+            'askiviki_wa_notify_cancelled',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
         add_settings_field(
             'askiviki_wa_enabled',
@@ -120,17 +144,26 @@ class AskIViki_WA_Settings {
         );
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_processing_template'
+            'askiviki_wa_processing_template',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_completed_template'
+            'askiviki_wa_completed_template',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_cancelled_template'
+            'askiviki_wa_cancelled_template',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
         add_settings_field(
             'askiviki_wa_processing_template',
@@ -157,7 +190,10 @@ class AskIViki_WA_Settings {
         );
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_admin_notifications'
+            'askiviki_wa_admin_notifications',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
         add_settings_field(
             'askiviki_wa_admin_notifications',
@@ -168,7 +204,10 @@ class AskIViki_WA_Settings {
         );
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_verify_token'
+            'askiviki_wa_verify_token',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
         add_settings_field(
             'askiviki_wa_verify_token',
@@ -179,17 +218,26 @@ class AskIViki_WA_Settings {
         );
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_use_template'
+            'askiviki_wa_use_template',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_template_name'
+            'askiviki_wa_template_name',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_template_language'
+            'askiviki_wa_template_language',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
         add_settings_field(
             'askiviki_wa_use_template',
@@ -217,17 +265,26 @@ class AskIViki_WA_Settings {
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_processing_template_name'
+            'askiviki_wa_processing_template_name',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_completed_template_name'
+            'askiviki_wa_completed_template_name',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
 
         register_setting(
             'askiviki_wa_group',
-            'askiviki_wa_cancelled_template_name'
+            'askiviki_wa_cancelled_template_name',
+            [
+                'sanitize_callback' => 'sanitize_text_field',
+            ]
         );
         add_settings_field(
             'askiviki_wa_processing_template_name',

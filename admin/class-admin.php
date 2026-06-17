@@ -26,8 +26,8 @@ class AskIViki_WA_Admin {
 
         add_submenu_page(
             'woocommerce',
-            'Ask I Viki WhatsApp',
-            'Ask I Viki WhatsApp',
+            'Ask I Viki CRM',
+            'Ask I Viki CRM',
             'manage_options',
             'askiviki-whatsapp',
             [$this, 'settings_page']
@@ -42,15 +42,26 @@ class AskIViki_WA_Admin {
         );
         global $wpdb;
 
-        $unread_count =
-            (int) $wpdb->get_var(
-                "
-        SELECT COUNT(
-            DISTINCT phone
-        )
-        FROM {$wpdb->prefix}askiviki_wa_messages
-        WHERE is_read = 0
-        ");
+        $unread_count = wp_cache_get( 'askiviki_unread_count' );
+
+        if ( false === $unread_count ) {
+
+            $unread_count =
+                (int) $wpdb->get_var(
+                    "
+            SELECT COUNT(DISTINCT phone)
+            FROM {$wpdb->prefix}askiviki_wa_messages
+            WHERE is_read = 0
+            "
+                );
+
+            wp_cache_set(
+                'askiviki_unread_count',
+                $unread_count,
+                'askiviki',
+                60
+            );
+        }
         add_submenu_page(
             'woocommerce',
             'WhatsApp Inbox',
@@ -98,7 +109,7 @@ class AskIViki_WA_Admin {
 
             <?php settings_errors('askiviki_wa'); ?>
 
-            <h1>Ask I Viki WooCommerce WhatsApp</h1>
+            <h1>Ask I Viki CRM for WooCommerce</h1>
 
             <form method="post" action="options.php">
                 <?php
@@ -143,7 +154,7 @@ class AskIViki_WA_Admin {
             return;
         }
 
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['askiviki_test_nonce'])),'askiviki_send_test')) {
+        if (! isset( $_POST['askiviki_test_nonce'] ) || ! wp_verify_nonce(sanitize_text_field( wp_unslash( $_POST['askiviki_test_nonce'] )),'askiviki_send_test')) {
             return;
         }
 
@@ -167,7 +178,7 @@ class AskIViki_WA_Admin {
 
             $service->send_message(
                 $phone,
-                'Hello from Ask I Viki WooCommerce WhatsApp'
+                'Hello from Ask I Viki CRM for WooCommerce'
             );
         }
 
@@ -249,11 +260,17 @@ class AskIViki_WA_Admin {
         );
         $selected_tag =
             sanitize_text_field(
-                $_GET['tag'] ?? ''
+                wp_unslash(
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter.
+                    $_GET['tag'] ?? ''
+                )
             );
         $search =
             sanitize_text_field(
-                $_GET['search'] ?? ''
+                wp_unslash(
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter.
+                    $_GET['search'] ?? ''
+                )
             );
         if (!empty($selected_tag)) {
 
@@ -280,7 +297,10 @@ class AskIViki_WA_Admin {
         }
         $attention =
             sanitize_text_field(
-                $_GET['attention'] ?? ''
+                wp_unslash(
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter.
+                    $_GET['attention'] ?? ''
+                )
             );
         if ($attention === '1') {
 
@@ -298,12 +318,6 @@ class AskIViki_WA_Admin {
                             ",
                             $message->phone
                         )
-                    );
-                    error_log(
-                        '[Attention Filter] Phone: ' .
-                        $message->phone .
-                        ' Unread: ' .
-                        $unread
                     );
                     return $unread > 0;
                 }
@@ -398,6 +412,7 @@ class AskIViki_WA_Admin {
         );
         ?>
         <div class="wrap">
+            <?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter. ?>
             <?php if (isset($_GET['reply_sent']))
             {
                 ?>
@@ -407,6 +422,7 @@ class AskIViki_WA_Admin {
             <?php
             }
             ?>
+            <?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter. ?>
             <div style="background:#fff;padding:20px;border:1px solid #ddd;margin-bottom:20px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);">
                 <h1 style="margin:0;">
                     Ask I Viki CRM
@@ -526,7 +542,9 @@ class AskIViki_WA_Admin {
             </div>
             <form method="get" style="margin-bottom:20px;">
                 <input type="hidden" name="page" value="askiviki-wa-inbox">
+                <?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter. ?>
                 <input type="text" name="search" placeholder="Search phone, customer name..." value="<?php echo esc_attr(sanitize_text_field(wp_unslash($_GET['search'] ?? ''))); ?>" style="width:300px;">
+                <?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter. ?>
                 <input type="submit" class="button" value="Search">
             </form>
             <form method="get">
@@ -796,13 +814,13 @@ class AskIViki_WA_Admin {
                                 <?php if ( $customer_note && $customer_note->is_vip ) {
                                     echo esc_html__(
                                         '⭐ VIP',
-                                        'askiviki-woocommerce-whatsapp'
+                                        'askiviki-crm-for-woocommerce'
                                     );
                                 }
                                 if ( $customer_note && $customer_note->priority_level === 'urgent' ) {
                                     echo esc_html__(
                                         '🚨 Urgent',
-                                        'askiviki-woocommerce-whatsapp'
+                                        'askiviki-crm-for-woocommerce'
                                     );
                                 }
                                 ?>
@@ -839,21 +857,13 @@ class AskIViki_WA_Admin {
             return;
         }
 
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['askiviki_reply_nonce'])),'askiviki_reply_message')) {
+        if (! isset( $_POST['askiviki_reply_nonce'] ) || ! wp_verify_nonce(sanitize_text_field( wp_unslash( $_POST['askiviki_reply_nonce'] )),'askiviki_reply_message')) {
             return;
         }
 
-        $phone = sanitize_text_field(
-            wp_unslash(
-                $_POST['phone']
-            )
-        );
+        $phone = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
 
-        $message = sanitize_textarea_field(
-            wp_unslash(
-                $_POST['reply_message']
-            )
-        );
+        $message = isset( $_POST['reply_message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['reply_message'] ) ) : '';
 
         $service =
             new AskIViki_WA_Service();
@@ -884,7 +894,7 @@ class AskIViki_WA_Admin {
             ]
         );
 
-        wp_redirect(
+        wp_safe_redirect(
             add_query_arg(
                 [
                     'page'       => 'askiviki-conversation',
@@ -904,8 +914,11 @@ class AskIViki_WA_Admin {
         global $wpdb;
 
         $phone = sanitize_text_field(
-            $_GET['phone'] ?? ''
-        );
+                wp_unslash(
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter.
+                    $_GET['phone'] ?? ''
+                )
+            );
         $wpdb->update(
             $wpdb->prefix .'askiviki_wa_messages',
             [
@@ -1017,7 +1030,6 @@ class AskIViki_WA_Admin {
                     $phone
                 )
             );
-        $table = $wpdb->prefix . 'askiviki_wa_messages';
 
         $messages = [];
 
@@ -1027,7 +1039,7 @@ class AskIViki_WA_Admin {
                 $wpdb->prepare(
                     "
                 SELECT *
-                FROM {$table}
+                FROM {$wpdb->prefix}askiviki_wa_messages
                 WHERE phone = %s
                 ORDER BY created_at ASC
                 ",
@@ -1039,7 +1051,7 @@ class AskIViki_WA_Admin {
         ?>
 
         <div class="wrap">
-
+            <?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter. ?>
             <?php if (isset($_GET['reply_sent'])) : ?>
 
                 <div class="notice notice-success is-dismissible">
@@ -1047,6 +1059,8 @@ class AskIViki_WA_Admin {
                 </div>
 
             <?php endif; ?>
+            <?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter. ?>
+            <?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter. ?>
             <?php if (isset($_GET['note_saved'])) : ?>
 
                 <div class="notice notice-success is-dismissible">
@@ -1056,7 +1070,7 @@ class AskIViki_WA_Admin {
                 </div>
 
             <?php endif; ?>
-
+            <?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter. ?>
             <p>
                 <a
                         href="<?php echo esc_url(admin_url(
@@ -1698,43 +1712,53 @@ class AskIViki_WA_Admin {
         }
 
         if (
-        !wp_verify_nonce(
-            $_POST['askiviki_note_nonce'],
-            'askiviki_save_customer_note'
-        )
+            ! isset( $_POST['askiviki_note_nonce'] ) ||
+            ! wp_verify_nonce(
+                sanitize_text_field(
+                    wp_unslash( $_POST['askiviki_note_nonce'] )
+                ),
+                'askiviki_save_customer_note'
+            )
         ) {
             return;
         }
 
         global $wpdb;
 
-        $phone = sanitize_text_field(
-            wp_unslash(
-                $_POST['customer_phone']
+        $phone = isset( $_POST['customer_phone'] )
+            ? sanitize_text_field(
+                wp_unslash(
+                    $_POST['customer_phone']
+                )
             )
-        );
+            : '';
 
-        $tags = sanitize_text_field(
-            wp_unslash(
-                $_POST['customer_tags']
+        $tags = isset( $_POST['customer_tags'] )
+            ? sanitize_text_field(
+                wp_unslash(
+                    $_POST['customer_tags']
+                )
             )
-        );
+            : '';
 
-        $notes = sanitize_textarea_field(
-            wp_unslash(
-                $_POST['customer_notes']
+        $notes = isset( $_POST['customer_notes'] )
+            ? sanitize_textarea_field(
+                wp_unslash(
+                    $_POST['customer_notes']
+                )
             )
-        );
+            : '';
         $is_vip = isset($_POST['is_vip']) ? 1 : 0;
 
         $is_pinned = isset($_POST['is_pinned']) ? 1 : 0;
 
-        $priority_level =
-            sanitize_text_field(
+        $priority_level = isset( $_POST['priority_level'] )
+            ? sanitize_text_field(
                 wp_unslash(
                     $_POST['priority_level']
                 )
-            );
+            )
+            : 'normal';
 
         $existing =
             $wpdb->get_var(
@@ -1783,7 +1807,7 @@ class AskIViki_WA_Admin {
             );
         }
 
-        wp_redirect(
+        wp_safe_redirect(
             add_query_arg(
                 [
                     'page' =>
@@ -1806,8 +1830,6 @@ class AskIViki_WA_Admin {
         }
     global $wpdb;
 
-    $table = $wpdb->prefix .'askiviki_wa_quick_replies';
-
     if ( isset($_POST['save_quick_reply'])) {
         if (
             !isset($_POST['askiviki_quick_reply_nonce'])
@@ -1824,21 +1846,25 @@ class AskIViki_WA_Admin {
             return;
         }
         $wpdb->insert(
-            $table,
+            $wpdb->prefix .'askiviki_wa_quick_replies',
             [
                 'title' =>
-                    sanitize_text_field(
+                    isset( $_POST['title'] )
+                        ? sanitize_text_field(
                         wp_unslash(
                             $_POST['title']
                         )
-                    ),
+                    )
+                        : '',
 
                 'message' =>
-                    sanitize_textarea_field(
+                    isset( $_POST['message'] )
+                        ? sanitize_textarea_field(
                         wp_unslash(
                             $_POST['message']
                         )
-                    ),
+                    )
+                        : '',
 
                 'created_at' =>
                     current_time(
@@ -1857,7 +1883,7 @@ class AskIViki_WA_Admin {
                 <?php
                 echo esc_html__(
                     'Quick reply saved successfully.',
-                    'askiviki-woocommerce-whatsapp'
+                    'askiviki-crm-for-woocommerce'
                 );
                 ?>
             </p>
@@ -1899,7 +1925,7 @@ class AskIViki_WA_Admin {
             </p>
         </form>
         <?php
-        $replies = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY id DESC" );
+        $replies = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}askiviki_wa_quick_replies ORDER BY id DESC" );
         ?>
         <h2> Saved Replies </h2>
         <table class="widefat striped">

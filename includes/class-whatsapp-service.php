@@ -14,10 +14,6 @@ class AskIViki_WA_Service
                 'yes'
             ) !== 'yes'
         ) {
-            error_log(
-                '[AskIViki WA] WhatsApp disabled'
-            );
-
             return false;
         }
         $phone_id   = get_option('askiviki_wa_phone_id');
@@ -31,9 +27,6 @@ class AskIViki_WA_Service
                 'body' => $message
             ]
         ];
-        if (get_option('askiviki_wa_debug') === 'yes') {
-            error_log('[AskIViki WA] Phone: ' . $phone);
-        }
         if (empty($phone_id) || empty($token) || empty($phone)) {
             return false;
         }
@@ -201,11 +194,6 @@ class AskIViki_WA_Service
         );
 
         if ($code < 200 || $code >= 300) {
-
-            error_log(
-                '[AskIViki] Template send failed'
-            );
-
             return false;
         }
 
@@ -234,7 +222,7 @@ class AskIViki_WA_Service
     private function save_log($order_id,$phone,$status,$message,$response,$message_id = '')
     {
         global $wpdb;
-
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Logging to plugin-owned table.
         $wpdb->insert(
             $wpdb->prefix . 'askiviki_wa_logs',
             [
@@ -247,5 +235,6 @@ class AskIViki_WA_Service
                 'created_at' => current_time('mysql')
             ]
         );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Logging to plugin-owned table.
     }
 }

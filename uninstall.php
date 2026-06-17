@@ -12,7 +12,7 @@
     |--------------------------------------------------------------------------
     */
 
-    $options = [
+    $askiviki_options = [
         'askiviki_wa_phone',
         'askiviki_wa_test_number',
         'askiviki_wa_phone_id',
@@ -34,8 +34,8 @@
         'askiviki_wa_cancelled_template_name',
     ];
 
-    foreach ($options as $option) {
-        delete_option($option);
+    foreach ($askiviki_options as $askiviki_option) {
+        delete_option($askiviki_option);
     }
 
     /*
@@ -44,15 +44,19 @@
     |--------------------------------------------------------------------------
     */
 
-    $tables = [
-        'askiviki_wa_messages',
-        'askiviki_wa_customer_notes',
-        'askiviki_wa_quick_replies',
-        'askiviki_wa_logs',
-    ];
+    $askiviki_tables = array(
+        $wpdb->prefix . 'askiviki_wa_messages',
+        $wpdb->prefix . 'askiviki_wa_customer_notes',
+        $wpdb->prefix . 'askiviki_wa_quick_replies',
+        $wpdb->prefix . 'askiviki_wa_logs',
+    );
 
-    foreach ($tables as $table) {
+    foreach ( $askiviki_tables as $askiviki_table ) {
+
+        $askiviki_table = esc_sql( $askiviki_table );
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange -- Required during plugin uninstall to remove plugin-owned tables.
         $wpdb->query(
-            "DROP TABLE IF EXISTS {$wpdb->prefix}{$table}"
+            "DROP TABLE IF EXISTS `{$askiviki_table}`"
         );
     }

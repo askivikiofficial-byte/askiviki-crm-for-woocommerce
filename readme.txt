@@ -1,12 +1,12 @@
-=== Ask I Viki WooCommerce WhatsApp ===
+=== Ask I Viki CRM for WooCommerce ===
 
 Contributors: askivikiofficial
 
-Tags: whatsapp, woocommerce, crm, customer support, notifications, whatsapp crm, whatsapp cloud api
+Tags: whatsapp, woocommerce, crm, customer-support, notifications
 
 Requires at least: 6.0
 
-Tested up to: 6.8
+Tested up to: 7.0
 
 Requires PHP: 7.4
 
@@ -20,7 +20,7 @@ WhatsApp CRM and customer communication solution for WooCommerce powered by the 
 
 == Description ==
 
-Ask I Viki WooCommerce WhatsApp transforms WooCommerce customer communication into a complete WhatsApp CRM experience.
+Ask I Viki CRM for WooCommerce transforms customer communication into a complete messaging and CRM experience powered by the Meta WhatsApp Cloud API.
 
 Manage customer conversations, monitor order activity, send WhatsApp notifications, organize customer profiles, and provide faster support directly from your WordPress dashboard.
 
@@ -78,7 +78,7 @@ Manage customer conversations, monitor order activity, send WhatsApp notificatio
 
 1. Upload the plugin to the `/wp-content/plugins/` directory.
 2. Activate the plugin through the WordPress Plugins screen.
-3. Navigate to WooCommerce → Ask I Viki WhatsApp.
+3. Navigate to WooCommerce → Ask I Viki CRM.
 4. Configure your Meta WhatsApp Cloud API credentials.
 5. Configure the webhook URL in Meta Developer Portal.
 6. Save settings and test your connection.
