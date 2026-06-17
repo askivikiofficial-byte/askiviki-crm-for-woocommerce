@@ -63,11 +63,6 @@ class AskIViki_WA_WooCommerce_Hooks
             ]
         );
         if (!$sent) {
-
-            error_log(
-                '[AskIViki] Processing fallback triggered'
-            );
-
             $template = get_option(
                 'askiviki_wa_processing_template'
             );
@@ -119,11 +114,6 @@ class AskIViki_WA_WooCommerce_Hooks
             ]
         );
         if (!$sent) {
-
-            error_log(
-                '[AskIViki] Completed fallback triggered'
-            );
-
             $template = get_option(
                 'askiviki_wa_completed_template'
             );
@@ -175,11 +165,6 @@ class AskIViki_WA_WooCommerce_Hooks
             ]
         );
         if (!$sent) {
-
-            error_log(
-                '[AskIViki] Cancelled fallback triggered'
-            );
-
             $template = get_option(
                 'askiviki_wa_cancelled_template'
             );

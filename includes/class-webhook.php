@@ -41,18 +41,21 @@ class AskIViki_WA_Webhook
     {
         $mode = sanitize_text_field(
             wp_unslash(
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter.
                 $_GET['hub_mode'] ?? ''
             )
         );
 
         $token = sanitize_text_field(
             wp_unslash(
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter.
                 $_GET['hub_verify_token'] ?? ''
             )
         );
 
         $challenge = sanitize_text_field(
             wp_unslash(
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter parameter.
                 $_GET['hub_challenge'] ?? ''
             )
         );
@@ -64,7 +67,7 @@ class AskIViki_WA_Webhook
 
             header('Content-Type: text/plain');
 
-            echo $challenge;
+            echo esc_html( $challenge );
 
             exit;
         }
@@ -94,7 +97,7 @@ class AskIViki_WA_Webhook
             ?? [];
 
         foreach ($statuses as $status) {
-
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Updating webhook message status.
             $result = $wpdb->update(
                 $wpdb->prefix . 'askiviki_wa_logs',
                 [
@@ -105,13 +108,8 @@ class AskIViki_WA_Webhook
                 ]
             );
         }
-
-        error_log(
-            '[AskIViki Incoming] ' .
-            wp_json_encode($messages)
-        );
         foreach ($messages as $message) {
-
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Webhook message stored in plugin-owned table.
             $result = $wpdb->insert(
                 $wpdb->prefix .'askiviki_wa_messages',
                 [
@@ -133,16 +131,6 @@ class AskIViki_WA_Webhook
                     'created_at' =>
                         current_time('mysql')
                 ]
-            );
-
-            error_log(
-                '[AskIViki Insert Result] ' .
-                $result
-            );
-
-            error_log(
-                '[AskIViki DB Error] ' .
-                $wpdb->last_error
             );
         }
 
