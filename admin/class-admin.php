@@ -814,13 +814,13 @@ class AskIViki_WA_Admin {
                                 <?php if ( $customer_note && $customer_note->is_vip ) {
                                     echo esc_html__(
                                         '⭐ VIP',
-                                        'askiviki-crm-for-woocommerce'
+                                        'ask-i-viki-crm-for-woocommerce'
                                     );
                                 }
                                 if ( $customer_note && $customer_note->priority_level === 'urgent' ) {
                                     echo esc_html__(
                                         '🚨 Urgent',
-                                        'askiviki-crm-for-woocommerce'
+                                        'ask-i-viki-crm-for-woocommerce'
                                     );
                                 }
                                 ?>
@@ -1883,7 +1883,7 @@ class AskIViki_WA_Admin {
                 <?php
                 echo esc_html__(
                     'Quick reply saved successfully.',
-                    'askiviki-crm-for-woocommerce'
+                    'ask-i-viki-crm-for-woocommerce'
                 );
                 ?>
             </p>

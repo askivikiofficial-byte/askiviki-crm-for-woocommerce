@@ -7,7 +7,7 @@
  * Version: 1.0.2
  * Author: Ask I Viki
  * Author URI: https://askiviki.simpletechgroups.com/
- * Text Domain: askiviki-crm-for-woocommerce
+ * Text Domain: ask-i-viki-crm-for-woocommerce
  * Domain Path: /languages
  * Requires at least: 6.0
  * Tested up to: 7.0
