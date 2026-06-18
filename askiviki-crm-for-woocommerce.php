@@ -4,7 +4,7 @@
  * Plugin Name: Ask I Viki CRM for WooCommerce
  * Plugin URI: https://askiviki.simpletechgroups.com/
  * Description: Customer messaging, CRM, support inbox, quick replies and WooCommerce notifications powered by the Meta Cloud API.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Ask I Viki
  * Author URI: https://askiviki.simpletechgroups.com/
  * Text Domain: askiviki-crm-for-woocommerce
