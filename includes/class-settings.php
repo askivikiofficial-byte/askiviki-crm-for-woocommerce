@@ -146,7 +146,7 @@ class AskIViki_WA_Settings {
             'askiviki_wa_group',
             'askiviki_wa_processing_template',
             [
-                'sanitize_callback' => 'sanitize_text_field',
+                'sanitize_callback' => 'sanitize_textarea_field',
             ]
         );
 
@@ -154,7 +154,7 @@ class AskIViki_WA_Settings {
             'askiviki_wa_group',
             'askiviki_wa_completed_template',
             [
-                'sanitize_callback' => 'sanitize_text_field',
+                'sanitize_callback' => 'sanitize_textarea_field',
             ]
         );
 
@@ -162,7 +162,7 @@ class AskIViki_WA_Settings {
             'askiviki_wa_group',
             'askiviki_wa_cancelled_template',
             [
-                'sanitize_callback' => 'sanitize_text_field',
+                'sanitize_callback' => 'sanitize_textarea_field',
             ]
         );
         add_settings_field(
