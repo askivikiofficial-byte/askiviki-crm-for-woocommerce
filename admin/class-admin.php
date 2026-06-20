@@ -20,6 +20,10 @@ class AskIViki_WA_Admin {
             'admin_init',
             [$this, 'save_customer_note']
         );
+        add_action(
+            'admin_enqueue_scripts',
+            [ $this, 'enqueue_admin_assets' ]
+        );
     }
 
     public function register_menu() {
@@ -1682,15 +1686,6 @@ class AskIViki_WA_Admin {
                                 value="Send Reply">
 
                     </form>
-                    <script>
-                        document.querySelectorAll('.quick-reply-btn').forEach(function(btn){
-                                    btn.addEventListener('click',function(){
-                                            document.querySelector('textarea[name="reply_message"]').value += this.dataset.message;
-                                        }
-                                    );
-                            });
-
-                    </script>
                 </div>
             </div>
 
@@ -1948,6 +1943,16 @@ class AskIViki_WA_Admin {
         </table>
     </div>
         <?php
+    }
+    public function enqueue_admin_assets() {
+
+        wp_enqueue_script(
+            'askiviki-admin',
+            plugin_dir_url( dirname( __FILE__ ) ) . 'assets/js/admin.js',
+            [],
+            ASKIVIKI_WA_VERSION,
+            true
+        );
     }
         
 }

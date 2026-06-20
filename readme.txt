@@ -10,7 +10,7 @@ Tested up to: 7.0
 
 Requires PHP: 7.4
 
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 
 License: GPLv2 or later
 
@@ -83,6 +83,37 @@ Manage customer conversations, monitor order activity, send WhatsApp notificatio
 5. Configure the webhook URL in Meta Developer Portal.
 6. Save settings and test your connection.
 7. Start managing customer conversations from the WhatsApp CRM Inbox.
+
+== External Services ==
+
+This plugin connects to the Meta WhatsApp Cloud API to send and receive WhatsApp messages.
+
+What the service is used for:
+
+* Sending WooCommerce order notifications
+* Sending customer support messages
+* Receiving incoming WhatsApp messages
+
+What data is sent:
+
+* Customer phone number
+* Message content
+* Order information included in notifications
+
+When data is sent:
+
+* When an order notification is triggered
+* When an administrator sends a message
+* When Meta sends webhook events
+
+Service Provider:
+Meta Platforms, Inc.
+
+Terms of Service:
+https://www.facebook.com/legal/terms
+
+Privacy Policy:
+https://www.facebook.com/privacy/policy/
 
 == Frequently Asked Questions ==
 

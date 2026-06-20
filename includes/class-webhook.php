@@ -32,7 +32,7 @@ class AskIViki_WA_Webhook
             [
                 'methods' => 'POST',
                 'callback' => [$this, 'receive'],
-                'permission_callback' => '__return_true'
+                'permission_callback' => [ $this, 'webhook_permission' ]
             ]
         );
     }
@@ -137,5 +137,22 @@ class AskIViki_WA_Webhook
         return [
             'success' => true
         ];
+    }
+    public function webhook_permission( $request ) {
+
+        $token = $request->get_header( 'x-askiviki-token' );
+
+        if (
+            empty( $token ) ||
+            $token !== get_option( 'askiviki_wa_verify_token' )
+        ) {
+            return new WP_Error(
+                'forbidden',
+                __( 'Unauthorized request.', 'ask-i-viki-crm-for-woocommerce' ),
+                [ 'status' => 403 ]
+            );
+        }
+
+        return true;
     }
 }

@@ -4,7 +4,7 @@
  * Plugin Name: Ask I Viki CRM for WooCommerce
  * Plugin URI: https://github.com/askivikiofficial-byte/askiviki-crm-for-woocommerce
  * Description: Customer messaging, CRM, support inbox, quick replies and WooCommerce notifications powered by the Meta Cloud API.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author: Ask I Viki
  * Author URI: https://askiviki.simpletechgroups.com/
  * Text Domain: ask-i-viki-crm-for-woocommerce
@@ -14,6 +14,7 @@
  * Requires PHP: 7.4
  * WC requires at least: 8.0
  * WC tested up to: 11.0
+ * Requires Plugins: woocommerce
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -23,6 +24,7 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+define( 'ASKIVIKI_WA_VERSION', '1.0.4' );
 add_action(
     'before_woocommerce_init',
     function () {
